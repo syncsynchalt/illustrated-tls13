@@ -3,3 +3,4 @@
 /boringssl/*.a
 /boringssl/include
 /server/server
+/client/client
