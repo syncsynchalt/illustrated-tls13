@@ -2,3 +2,4 @@
 /boringssl/build
 /boringssl/*.a
 /boringssl/include
+/server/server
