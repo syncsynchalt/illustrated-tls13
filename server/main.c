@@ -28,6 +28,10 @@ int create_listen(int port)
 	if (s < 0) {
 		die("Unable to create socket");
 	}
+	int enable = 1;
+	if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0) {
+		die("SO_REUSEADDR failed");
+	}
 	if (bind(s, (struct sockaddr*)&addr, sizeof(addr)) < 0) {
 		die("Unable to bind to port");
 	}
