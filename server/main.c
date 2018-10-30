@@ -57,6 +57,11 @@ SSL_CTX *create_context()
 	return ctx;
 }
 
+void keylog_callback(const SSL *ssl, const char *line)
+{
+	printf("%s\n", line);
+}
+
 void configure_context(SSL_CTX *ctx)
 {
 	if (!SSL_CTX_set_ecdh_auto(ctx, 1))
@@ -65,6 +70,7 @@ void configure_context(SSL_CTX *ctx)
 		die("Unable to load server.crt");
 	if (!SSL_CTX_use_PrivateKey_file(ctx, "server.key", SSL_FILETYPE_PEM))
 		die("Unable to load server.key");
+	SSL_CTX_set_keylog_callback(ctx, keylog_callback);
 }
 
 int main(int argc, char **argv)

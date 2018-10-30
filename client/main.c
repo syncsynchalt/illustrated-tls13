@@ -36,13 +36,28 @@ SSL_CTX *create_context()
 	return ctx;
 }
 
+void keylog_callback(const SSL *ssl, const char *line)
+{
+	printf("%s\n", line);
+}
+
 void configure_context(SSL_CTX *ctx)
 {
 	if (!SSL_CTX_set1_curves_list(ctx, "X25519"))
 		die("Unable to set ECDH curve");
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
-	int forbid = SSL_OP_NO_SSLv2|SSL_OP_NO_SSLv3|SSL_OP_NO_TLSv1|SSL_OP_NO_TLSv1_1;
-	SSL_CTX_set_options(ctx, forbid);
+	SSL_CTX_set_min_proto_version(ctx, TLS1_3_VERSION);
+	SSL_CTX_set_keylog_callback(ctx, keylog_callback);
+}
+
+void configure_connection(SSL *ssl)
+{
+	SSL_set_tlsext_host_name(ssl, "example.ulfheim.net");
+	SSL_set_connect_state(ssl);
+	if (SSL_do_handshake(ssl) <= 0) {
+		ERR_print_errors_fp(stderr);
+		die("Unable to do handshake");
+	}
 }
 
 size_t resolve_hostname(const char *host, const char *port, struct sockaddr_storage *addr)
@@ -76,12 +91,7 @@ int main(int argc, char **argv)
 
 	SSL *ssl = SSL_new(ctx);
 	SSL_set_fd(ssl, sock);
-	SSL_set_tlsext_host_name(ssl, "example.ulfheim.net");
-	SSL_set_connect_state(ssl);
-	if (SSL_do_handshake(ssl) <= 0) {
-		ERR_print_errors_fp(stderr);
-		die("Unable to do handshake");
-	}
+	configure_connection(ssl);
 
 	char wbuf[] = "ping";
 	if (SSL_write(ssl, wbuf, strlen(wbuf)) <= 0) {
