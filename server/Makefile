@@ -1,4 +1,4 @@
-CFLAGS += -I../boringssl/include
+CFLAGS += -I../boringssl/include -Wall
 LDFLAGS += -L../boringssl -lssl -lcrypto
 
 client: main.c ../boringssl/libssl.a ../boringssl/libcrypto.a

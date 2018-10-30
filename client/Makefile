@@ -1,8 +1,8 @@
-CFLAGS += -I../boringssl/include
+CFLAGS += -I../boringssl/include -Wall
 LDFLAGS += -L../boringssl -lssl -lcrypto
 
 client: main.c ../boringssl/libssl.a ../boringssl/libcrypto.a
 	$(CC) $(CFLAGS) -o client main.c -Wall $(LDFLAGS)
 
 clean:
-	rm -f server
+	rm -f client

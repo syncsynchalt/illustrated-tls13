@@ -4,3 +4,4 @@
 /boringssl/include
 /server/server
 /client/client
+/tools/aes_128_gcm_decrypt
