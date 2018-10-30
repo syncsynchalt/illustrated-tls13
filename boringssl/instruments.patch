@@ -1,3 +1,56 @@
+diff --git a/crypto/fipsmodule/rsa/padding.c b/crypto/fipsmodule/rsa/padding.c
+index b7998fe3..7bf724cc 100644
+--- a/crypto/fipsmodule/rsa/padding.c
++++ b/crypto/fipsmodule/rsa/padding.c
+@@ -146,6 +146,7 @@ int RSA_padding_check_PKCS1_type_1(uint8_t *out, size_t *out_len,
+ }
+ 
+ static int rand_nonzero(uint8_t *out, size_t len) {
++/*
+   if (!RAND_bytes(out, len)) {
+     return 0;
+   }
+@@ -157,6 +158,10 @@ static int rand_nonzero(uint8_t *out, size_t len) {
+       }
+     }
+   }
++*/
++  for (size_t i = 0; i < len; i++) {
++    out[i] = '\x20';
++  }
+ 
+   return 1;
+ }
+@@ -349,9 +354,14 @@ int RSA_padding_add_PKCS1_OAEP_mgf1(uint8_t *to, size_t to_len,
+   OPENSSL_memset(db + mdlen, 0, emlen - from_len - 2 * mdlen - 1);
+   db[emlen - from_len - mdlen - 1] = 0x01;
+   OPENSSL_memcpy(db + emlen - from_len - mdlen, from, from_len);
++/*
+   if (!RAND_bytes(seed, mdlen)) {
+     return 0;
+   }
++*/
++  for (size_t i = 0; i < mdlen; i++) {
++    seed[i] = '\x21';
++  }
+ 
+   uint8_t *dbmask = OPENSSL_malloc(emlen - mdlen);
+   if (dbmask == NULL) {
+@@ -639,9 +649,14 @@ int RSA_padding_add_PKCS1_PSS_mgf1(const RSA *rsa, unsigned char *EM,
+       OPENSSL_PUT_ERROR(RSA, ERR_R_MALLOC_FAILURE);
+       goto err;
+     }
++/*
+     if (!RAND_bytes(salt, sLen)) {
+       goto err;
+     }
++*/
++    for (size_t i = 0; i < sLen; i++) {
++      salt[i] = '\x22';
++    }
+   }
+   maskedDBLen = emLen - hLen - 1;
+   H = EM + maskedDBLen;
 diff --git a/include/openssl/curve25519.h b/include/openssl/curve25519.h
 index a455389c..b6b9612d 100644
 --- a/include/openssl/curve25519.h
@@ -11,6 +64,22 @@ index a455389c..b6b9612d 100644
  
  // X25519 writes a shared key to |out_shared_key| that is calculated from the
  // given private key and the peer's public value. It returns one on success and
+diff --git a/ssl/handshake.cc b/ssl/handshake.cc
+index 963038f5..aacb934b 100644
+--- a/ssl/handshake.cc
++++ b/ssl/handshake.cc
+@@ -405,7 +405,11 @@ uint16_t ssl_get_grease_value(SSL_HANDSHAKE *hs,
+   // connection. The latter is so the second ClientHello matches after
+   // HelloRetryRequest and so supported_groups and key_shares are consistent.
+   if (!hs->grease_seeded) {
++/*
+     RAND_bytes(hs->grease_seed, sizeof(hs->grease_seed));
++*/
++    const char grease_seed_override[] = "\x01\x12\x23\x34\x45\x56\x67\x78\x89\x9a";
++    OPENSSL_memcpy(hs->grease_seed, grease_seed_override, sizeof(hs->grease_seed));
+     hs->grease_seeded = true;
+   }
+ 
 diff --git a/ssl/handshake_client.cc b/ssl/handshake_client.cc
 index e46b39f9..9c584082 100644
 --- a/ssl/handshake_client.cc
@@ -83,6 +152,28 @@ index 8466eabb..ec61e2be 100644
    bool Offer(CBB *out) override {
      uint8_t public_key[32];
      X25519_keypair(public_key, private_key_);
+diff --git a/ssl/ssl_lib.cc b/ssl/ssl_lib.cc
+index 1f648658..f0c7efc6 100644
+--- a/ssl/ssl_lib.cc
++++ b/ssl/ssl_lib.cc
+@@ -414,6 +414,7 @@ void ssl_ctx_get_current_time(const SSL_CTX *ctx,
+   if (ctx->current_time_cb != NULL) {
+     // TODO(davidben): Update current_time_cb to use OPENSSL_timeval. See
+     // https://crbug.com/boringssl/155.
++#if 0
+     struct timeval clock;
+     ctx->current_time_cb(nullptr /* ssl */, &clock);
+     if (clock.tv_sec < 0) {
+@@ -424,6 +425,9 @@ void ssl_ctx_get_current_time(const SSL_CTX *ctx,
+       out_clock->tv_sec = (uint64_t)clock.tv_sec;
+       out_clock->tv_usec = (uint32_t)clock.tv_usec;
+     }
++#endif
++    out_clock->tv_sec = 1540875868;
++    out_clock->tv_usec = 123456789;
+     return;
+   }
+ 
 diff --git a/ssl/t1_lib.cc b/ssl/t1_lib.cc
 index 678e4a3b..0b6f3b9b 100644
 --- a/ssl/t1_lib.cc
@@ -97,20 +188,25 @@ index 678e4a3b..0b6f3b9b 100644
      return false;
    }
 diff --git a/ssl/tls13_server.cc b/ssl/tls13_server.cc
-index 0d82d68b..b4fb87e7 100644
+index 0d82d68b..d48c5214 100644
 --- a/ssl/tls13_server.cc
 +++ b/ssl/tls13_server.cc
-@@ -178,6 +178,9 @@ static bool add_new_session_tickets(SSL_HANDSHAKE *hs, bool *out_sent_tickets) {
+@@ -175,9 +175,14 @@ static bool add_new_session_tickets(SSL_HANDSHAKE *hs, bool *out_sent_tickets) {
+       return false;
+     }
+ 
++/*
      if (!RAND_bytes((uint8_t *)&session->ticket_age_add, 4)) {
        return false;
      }
++*/
 +    const char *session_ticket_age_add_override = "\x01\x02\x03\x04";
 +    OPENSSL_memcpy(&session->ticket_age_add, session_ticket_age_add_override, 4);
 +
      session->ticket_age_add_valid = true;
      if (ssl->enable_early_data) {
        session->ticket_max_early_data = kMaxEarlyDataAccepted;
-@@ -560,12 +563,16 @@ static enum ssl_hs_wait_t do_read_second_client_hello(SSL_HANDSHAKE *hs) {
+@@ -560,12 +565,16 @@ static enum ssl_hs_wait_t do_read_second_client_hello(SSL_HANDSHAKE *hs) {
  static enum ssl_hs_wait_t do_send_server_hello(SSL_HANDSHAKE *hs) {
    SSL *const ssl = hs->ssl;
  
