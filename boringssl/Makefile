@@ -19,6 +19,6 @@ link: build/stamp
 	ln -sf ./boringssl/include ./include
 
 clean:
-	rm -rf boringssl build
+	rm -rf boringssl build include libssl.a libcrypto.a
 
 .PHONY: all link clean
