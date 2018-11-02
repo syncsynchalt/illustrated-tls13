@@ -1,0 +1,2068 @@
+<!doctype html>
+<html>
+
+<head>
+	<title>The Illustrated TLS 1.3 Connection: Every Byte Explained</title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
+	<meta name="format-detection" content="telephone=no"/>
+	<meta name="title" content="The Illustrated TLS 1.3 Connection"/>
+	<meta name="description" content="Every byte of a TLS 1.3 connection explained and reproduced"/>
+	<link rel="stylesheet" href="frombootstrap.css"/>
+	<link rel="stylesheet" href="illustrated.css"/>
+	<script src="illustrated.js"></script>
+</head>
+
+<body class="illustrated">
+<div class="container">
+	<h1>The Illustrated TLS 1.3 Connection</h1>
+
+	<h3>Every byte of a TLS 1.3 connection explained and reproduced.</h3>
+
+	<div class="outerblock">
+	<p>In this demonstration a client has connected to a server,
+	negotiated a TLS 1.3 session, sent "ping", received "pong",
+	and then terminated the session. Click below to begin
+	exploring.</p>
+	</div>
+
+<div class="rec-outer">
+<div class="calculation client">
+<div class="rec-label">Client Key Exchange Generation</div>
+<img class="illustration" src="images/key6.png" width="105" height="250"/>
+<div class="rec-explanation">
+	The client begins by calculating a private/public keypair
+	for key exchange.  Key exchange is a mathematical technique
+	by which two parties can agree on the same number without
+	an eavesdropper being able to tell what that number is.
+	<br/><br/>
+	It will do this via the elliptical curve method, using the x25519 curve.
+	<br/><br/>
+	The private key is chosen by selecting an integer between
+	1 and 2<sup>256</sup>-1.  It does this by generating 32
+	bytes (256 bits) of random data.  The
+	<a href="files/client-ephemeral-private.key" download="client-ephemeral-private.key">private key</a>
+	selected is:
+
+	<pre class="ind2"><tt class="longboi">202122232425262728292a2b2c2d2e2f303132333435363738393a3b3c3d3e3f</tt></pre>
+
+	The <a href="files/client-ephemeral-public.key" download="client-ephemeral-public.key">public key</a>
+	is chosen by multiplying the point x=9 on the x25519 curve
+	by the private key.  The public key calculated is:
+
+	<pre class="ind2"><tt class="longboi">358072d6365880d1aeea329adf9121383851ed21a28e3b75e965d0d2cd166254</tt></pre>
+
+	The public key calculation can be confirmed at the command line:
+	<codesample>
+<pre><code>### requires openssl 1.1.0 or higher
+$ openssl pkey -noout -text &lt; client-ephemeral-private.key
+
+X25519 Private-Key:
+priv:
+    20:21:22:23:24:25:26:27:28:29:2a:2b:2c:2d:2e:
+    2f:30:31:32:33:34:35:36:37:38:39:3a:3b:3c:3d:
+    3e:3f
+pub:
+    35:80:72:d6:36:58:80:d1:ae:ea:32:9a:df:91:21:
+    38:38:51:ed:21:a2:8e:3b:75:e9:65:d0:d2:cd:16:
+    62:54
+</code></pre>
+	</codesample>
+</div>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record client">
+<div class="rec-label">Client Hello</div>
+<img class="illustration" src="images/key1.png" width="135" height="250"/>
+<div class="rec-explanation">
+	The session begins with the client saying "Hello".
+	The client provides information including the following:
+	<ul>
+	<li>client random data (used later in the handshake)
+	<li>a list of cipher suites that the client supports
+	<li>a list of public keys that the server might find suitable for key negotiation
+	<li>protocol versions that the client can support
+	</ul>
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+ 16 03 01 00 c6
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<ul>
+			<li><tt>16</tt> - type is 0x16 (handshake record)
+			<li><tt>03 01</tt> - protocol version is 3.1 (also known as TLS 1.0)
+			<li><tt>00 c6</tt> - the length of the record payload is 0xC6 (198) bytes
+			</ul>
+			Interestingly the version is 3.1 (TLS 1.0)
+			instead of 3.4 (TLS 1.3).  This is done for
+			compatibility with earlier implementations.
+			<br/><br/>
+			All data following this header is the payload for this record.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+ 01 00 00 c2
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>01</tt> - handshake message type 0x01 (client hello)
+			<li><tt>00 00 c2</tt> - payload length of 0xC2 (194) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Client Version</span>
+		<span class="bytes">
+ 03 03
+		</span>
+		<div class="explanation">
+			A protocol version of 3.3 (meaning TLS 1.2)
+			is given.  Because middleware has been
+			created and widely deployed that does not
+			understand or allow protocol versions that
+			it does not recognize, the TLS 1.3 session
+			must be disguised as a TLS 1.2 session.
+			This field is no
+			longer used for version negotiation and
+			is hardcoded to the 1.2 version.  Instead
+			version negotiation is performed using the
+			"Supported Versions" extension below.
+			<br/><br/>
+			The particular version number (3.3 representing
+			version 1.2) is due to TLS 1.0 being a minor
+			revision of the SSL 3.0 protocol, which was
+			therefore assigned version 3.1.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Client Random</span>
+		<span class="bytes">
+ 00 01 02 03 04 05 06 07 08 09 0a 0b 0c 0d 0e 0f 10 11 12 13 14 15 16 17 18 19 1a 1b 1c 1d 1e 1f
+		</span>
+		<div class="explanation">
+			The client provides 32 bytes of random data.
+			In this example we've made the random data predictable to make it easier to recognize.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Session ID</span>
+		<span class="bytes">
+ 20 e0 e1 e2 e3 e4 e5 e6 e7 e8 e9 ea eb ec ed ee ef f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 fa fb fc fd fe
+ ff
+		</span>
+		<div class="explanation">
+			In previous versions of TLS the client could
+			provide an ID of a previously negotiated
+			session, which allows the server and client
+			to skip the time and cost of negotiating new keys.
+			<br/><br/>
+			In TLS 1.3 this is done via the more flexible
+			PSK (pre-shared keys) mechanism, so this
+			field is no longer needed for that purpose.
+			Instead a non-empty value in this field is
+			used to trigger "middlebox compatibility
+			mode" which allows TLS 1.3 sessions to be
+			disguised as resumed TLS 1.2 sessions.  The
+			client has generated random data to populate
+			this field.
+			<ul>
+			<li><tt>20</tt> - 0x20 (32) bytes of session ID follow
+			<li><tt>e0 e1 ... fe ff</tt> - fake session ID
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Cipher Suites</span>
+		<span class="bytes">
+ 00 06 13 01 13 02 13 03
+		</span>
+		<div class="explanation">
+			The client provides an ordered list of which
+			cipher suites it will support for encryption.
+			The list is in the order preferred by the
+			client, with highest preference first.
+			<br/><br/>
+			In TLS 1.3 the list of possible cipher
+			suites has been greatly reduced.  All the
+			remaining suites are AEAD algorithms which
+			provide stronger encryption guarantees than
+			many previous suites with an easier all-in-one
+			implementation.
+			<ul>
+			<li><tt>00 06</tt> - 0x6 (6) bytes of cipher suite data
+			<li><tt>13 01</tt> - assigned value for <tt>AES-128-GCM-SHA256</tt>
+			<li><tt>13 02</tt> - assigned value for <tt>AES-128-GCM-SHA384</tt>
+			<li><tt>13 03</tt> - assigned value for <tt>CHACHA20-POLY1305-SHA256</tt>
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Compression Methods</span>
+		<span class="bytes">
+ 01 00
+		</span>
+		<div class="explanation">
+			Previous versions of TLS supported
+			compression, which was found to leak
+			information about the encrypted data allowing
+			it to be read (see <a href="https://en.wikipedia.org/wiki/CRIME">CRIME</a>
+			and <a href="https://en.wikipedia.org/wiki/BREACH">BREACH</a>).
+			<br/><br/>
+			TLS 1.3 no longer allows compression, so
+			this field is always a single entry with
+			the "null" compression method which performs
+			no change to the data.
+			<ul>
+			<li><tt>01</tt> - 0x1 (1) bytes of compression methods
+			<li><tt>00</tt> - assigned value for "null" compression
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extensions Length</span>
+		<span class="bytes">
+ 00 73
+		</span>
+		<div class="explanation">
+			The client has provided a list of optional
+			extensions which the server can use to
+			take action or enable new features.
+			<ul>
+			<li><tt>00 73</tt> - the extensions will take 0x73 (115) bytes of data
+			</ul>
+			Each extension will start with two bytes
+			that indicate which extension it is, followed
+			by a two-byte content length field, followed
+			by the contents of the extension.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extension - Server Name</span>
+		<span class="bytes">
+ 00 00 00 18 00 16 00 00 13 65 78 61 6d 70 6c 65 2e 75 6c 66 68 65 69 6d 2e 6e 65 74
+		</span>
+		<div class="explanation">
+			The client has provided the name of the
+			server it is contacting, also known as SNI
+			(Server Name Indication).
+			<br/><br/>
+			Without this extension a HTTPS server would
+			not be able to provide service for multiple
+			hostnames on a single IP address (virtual
+			hosts) because it couldn't know which
+			hostname's certificate to send until
+			after the TLS session was negotiated and the
+			HTTP request was made.
+			<ul>
+				<li><tt>00 00</tt> - assigned value for extension "server name"
+				<li><tt>00 18</tt> - 0x18 (24) bytes of extension data follows
+				<li><tt>00 16</tt> - 0x16 (22) bytes of first (and only) list entry follows
+				<li><tt>00</tt> - list entry is type 0x00 "DNS hostname"
+				<li><tt>00 13</tt> - 0x13 (19) bytes of hostname follows
+				<li><tt>65 78 61 ... 6e 65 74</tt> - "example.ulfheim.net"
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extension - Supported Groups</span>
+		<span class="bytes">
+ 00 0a 00 04 00 02 00 1d
+		</span>
+		<div class="explanation">
+			The client has indicated that it supports
+			elliptic curve (EC) cryptography for xxx 1 curve.
+			To make this extension more generic for
+			other cryptography types it now calls these
+			"supported groups" instead of "supported
+			curves".
+			<ul>
+				<li><tt>00 0a</tt> - assigned value for extension "supported groups"
+				<li><tt>00 04</tt> - 0x4 (4) bytes of extension data follows
+				<li><tt>00 02</tt> - 0x2 (2) bytes of data are in the curves list
+				<li><tt>00 1d</tt> - assigned value for the curve "x25519"
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extension - Signature Algorithms</span>
+		<span class="bytes">
+ 00 0d 00 14 00 12 04 03 08 04 04 01 05 03 08 05 05 01 08 06 06 01 02 01
+		</span>
+		<div class="explanation">
+			This extension indicates which signature
+			algorithms the client supports.  This can
+			influence the certificate that the server
+			presents to the client, as well as the
+			signature that is used to tie the ephemeral
+			keys to the certificate's private key in
+			the CertificateVerify record.
+			<br/><br/>
+			This list is presented in descending order
+			of the client's preference.
+			<ul>
+				<li><tt>00 0d</tt> - assigned value for extension "Signature Algorithms"
+				<li><tt>00 14</tt> - 0x14 (20) bytes of extension data follows
+				<li><tt>00 12</tt> - 0x12 (18) bytes of data are in the following list of algorithms
+				<li><tt>04 03</tt> - assigned value for ECDSA-SECP256r1-SHA256
+				<li><tt>08 04</tt> - assigned value for RSA-PSS-RSAE-SHA256
+				<li><tt>04 01</tt> - assigned value for RSA-PKCS1-SHA256
+				<li><tt>05 03</tt> - assigned value for ECDSA-SECP384r1-SHA384
+				<li><tt>08 05</tt> - assigned value for RSA-PSS-RSAE-SHA384
+				<li><tt>05 01</tt> - assigned value for RSA-PKCS1-SHA386
+				<li><tt>08 06</tt> - assigned value for RSA-PSS-RSAE-SHA512
+				<li><tt>06 01</tt> - assigned value for RSA-PKCS1-SHA512
+				<li><tt>02 01</tt> - assigned value for RSA-PKCS1-SHA1
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extension - Key Share</span>
+		<span class="bytes">
+ 00 33 00 26 00 24 00 1d 00 20 35 80 72 d6 36 58 80 d1 ae ea 32 9a df 91 21 38 38 51 ed 21 a2 8e
+ 3b 75 e9 65 d0 d2 cd 16 62 54
+		</span>
+		<div class="explanation">
+			The client sends one or more public keys
+			using an algorithm that it thinks the server
+			will support.  This allows the
+			rest of the handshake after the ClientHello
+			and ServerHello messages to be encrypted,
+			unlike previous protocol versions where the
+			handshake was sent in the clear.
+			<br/><br/>
+			This list is presented in descending order
+			of the client's preference.
+			<ul>
+				<li><tt>00 33</tt> - assigned value for extension "Key Share"
+				<li><tt>00 26</tt> - 0x26 (38) bytes of extension data follows
+				<li><tt>00 24</tt> - 0x24 (36) bytes of key share data follows
+				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
+				<li><tt>00 20</tt> - 0x20 (32) bytes of public key follows
+				<li><tt>35 80 ... 62 54</tt></l> public key
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extension - PSK Key Exchange Modes</span>
+		<span class="bytes">
+ 00 2d 00 02 01 01
+		</span>
+		<div class="explanation">
+			The client indicates the modes available
+			for establishing keys from pre-shared keys
+			(PSKs).  Since we do not use PSKs in this
+			session, this extension has no effect.
+			<ul>
+				<li><tt>00 2d</tt> - assigned value for extension "PSK Key Exchange Modes"
+				<li><tt>00 02</tt> - 0x2 (2) bytes of extension data follows
+				<li><tt>01</tt> - 0x1 (1) bytes of exchange modes follow
+				<li><tt>01</tt> - assigned value for "PSK with (EC)DHE key establishment"
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extension - Supported Versions</span>
+		<span class="bytes">
+ 00 2b 00 03 02 03 04
+		</span>
+		<div class="explanation">
+			The client indicates its support of TLS 1.3.
+			<ul>
+				<li><tt>00 2b</tt> - assigned value for extension "Supported Versions"
+				<li><tt>00 03</tt> - 0x3 (3) bytes of extension data follows
+				<li><tt>02</tt> - 0x2 (2) bytes of TLS versions follow
+				<li><tt>03 04</tt> - assigned value for TLS 1.3
+			</ul>
+		</div>
+	</span>
+
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="calculation server">
+<div class="rec-label">Server Key Exchange Generation</div>
+<img class="illustration" src="images/key4.png" width="106" height="250"/>
+<div class="rec-explanation">
+	The server calculates a private/public keypair
+	for key exchange.  Key exchange is a mathematical technique
+	by which two parties can agree on the same number without
+	an eavesdropper being able to tell what that number is.
+	<br/><br/>
+	It will do this via the elliptical curve method, using the x25519 curve.
+	<br/><br/>
+	The private key is chosen by selecting an integer between
+	1 and 2<sup>256</sup>-1.  It does this by generating 32
+	bytes (256 bits) of random data.  The
+	<a href="files/server-ephemeral-private.key" download="server-ephemeral-private.key">private key</a>
+	selected is:
+
+<pre class="ind2"><tt class="longboi">909192939495969798999a9b9c9d9e9fa0a1a2a3a4a5a6a7a8a9aaabacadaeaf</tt></pre>
+
+	The <a href="files/server-ephemeral-public.key" download="server-ephemeral-public.key">public key</a>
+	is chosen by multiplying the point x=9 on the x25519 curve
+	by the private key.  The public key calculated is:
+
+<pre class="ind2"><tt class="longboi">9fd7ad6dcff4298dd3f96d5b1b2af910a0535b1488d7f8fabb349a982880b615</tt></pre>
+
+	The public key calculation can be confirmed with command line tools:
+	<codesample>
+<pre><code>### requires openssl 1.1.0 or higher
+$ openssl pkey -noout -text &lt; server-ephemeral-private.key
+
+X25519 Private-Key:
+priv:
+    90:91:92:93:94:95:96:97:98:99:9a:9b:9c:9d:9e:
+    9f:a0:a1:a2:a3:a4:a5:a6:a7:a8:a9:aa:ab:ac:ad:
+    ae:af
+pub:
+    9f:d7:ad:6d:cf:f4:29:8d:d3:f9:6d:5b:1b:2a:f9:
+    10:a0:53:5b:14:88:d7:f8:fa:bb:34:9a:98:28:80:
+    b6:15
+</code></pre>
+	</codesample>
+</div>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record server">
+<div class="rec-label">Server Hello</div>
+<img class="illustration" src="images/key2.png" width="124" height="250"/>
+<div class="rec-explanation">
+	The server says "Hello" back.  The server provides information including the following:
+	<ul>
+	<li>server random data (used later in the handshake)
+	<li>a selected cipher suite
+	<li>a public key for key negotiation
+	<li>the negotiated protocol version
+	</ul>
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+ 16 03 03 00 7a
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<ul>
+			<li><tt>16</tt> - type is 0x16 (handshake record)
+			<li><tt>03 03</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>00 7a</tt> - the length of the record payload is 0x7A (122) bytes
+			</ul>
+			All data following this header is the payload for this record.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+ 02 00 00 76
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>02</tt> - handshake message type 0x02 (server hello)
+			<li><tt>00 00 76</tt> - payload length of 0x76 (118) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Server Version</span>
+		<span class="bytes">
+ 03 03
+		</span>
+		<div class="explanation">
+			A protocol version of 3.3 (meaning TLS 1.2)
+			is given.  Because middleware has been
+			created and widely deployed that does not
+			understand or allow protocol versions that
+			it does not recognize, the TLS 1.3 session
+			must be disguised as a TLS 1.2 session.
+			This field is no
+			longer usable for version negotiation and
+			is hardcoded to the 1.2 version.  Instead
+			version negotiation is performed using the
+			"Supported Versions" extension below.
+			<br/><br/>
+			The particular version number (3.3 representing
+			version 1.2) is due to TLS 1.0 being a minor
+			revision of the SSL 3.0 protocol, which was
+			therefore assigned version 3.1.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Server Random</span>
+		<span class="bytes">
+ 70 71 72 73 74 75 76 77 78 79 7a 7b 7c 7d 7e 7f 80 81 82 83 84 85 86 87 88 89 8a 8b 8c 8d 8e 8f
+		</span>
+		<div class="explanation">
+			The server provides 32 bytes of random data.
+			In this example we've made the random data predictable to make it easier to recognize.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Session ID</span>
+		<span class="bytes">
+ 20 e0 e1 e2 e3 e4 e5 e6 e7 e8 e9 ea eb ec ed ee ef f0 f1 f2 f3 f4 f5 f6 f7 f8 f9 fa fb fc fd fe
+ ff
+		</span>
+		<div class="explanation">
+			This legacy field is no longer used to
+			identify and re-use sessions.  Instead the
+			server echos the session ID provided by the
+			client, if any.
+			<ul>
+			<li><tt>20</tt> - 0x20 (32) bytes of session ID follow
+			<li><tt>e0 e1 ... fe ff</tt> - session ID copied from Client Hello
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Cipher Suite</span>
+		<span class="bytes">
+ 13 01
+		</span>
+		<div class="explanation">
+			The server has selected cipher suite 0x1301
+			(AES-128-GCM-SHA256) from the list of options given by the client.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Compression Method</span>
+		<span class="bytes">
+ 00
+		</span>
+		<div class="explanation">
+			The server has selected compression method
+			0x00 ("Null", which performs no compression)
+			from the list of options given by the client.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extensions Length</span>
+		<span class="bytes">
+ 00 2e
+		</span>
+		<div class="explanation">
+			The server has returned a list of extensions
+			to the client.  Because the server is
+			forbidden from replying with an extension
+			that the client did not send in its hello
+			message, the server knows that the client
+			will support all extensions listed.
+			<ul>
+			<li><tt>00 2e</tt> - the extensions will take 0x2E (46) bytes of data
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extension - Key Share</span>
+		<span class="bytes">
+ 00 33 00 24 00 1d 00 20 9f d7 ad 6d cf f4 29 8d d3 f9 6d 5b 1b 2a f9 10 a0 53 5b 14 88 d7 f8 fa
+ bb 34 9a 98 28 80 b6 15
+		</span>
+		<div class="explanation">
+			The server sends a public key using the algorithm
+			of the public key sent by the client.  Once this is sent
+			encryption keys can be calculated and the rest of the
+			handshake will be encrypted,
+			unlike previous protocol versions where the
+			handshake was sent in the clear.
+			<ul>
+				<li><tt>00 33</tt> - assigned value for extension "Key Share"
+				<li><tt>00 24</tt> - 0x24 (36) bytes of extension data follows
+				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
+				<li><tt>9f d7</tt> - 0x9FD7 (40919) bytes of public key follows
+				<li><tt>ad 6d ... b6 15</tt></l> public key
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extension - Supported Versions</span>
+		<span class="bytes">
+ 00 2b 00 02 03 04
+		</span>
+		<div class="explanation">
+			The server indicates the negotiated TLS version of 1.3.
+			<ul>
+				<li><tt>00 2b</tt> - assigned value for extension "Supported Versions"
+				<li><tt>00 02</tt> - 0x2 (2) bytes of extension data follows
+				<li><tt>03 04</tt> - assigned value for TLS 1.3
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="calculation server">
+<div class="rec-label">Server Handshake Keys Calc</div>
+<img class="illustration" src="images/key9.png" width="97" height="250"/>
+<div class="rec-explanation">
+	The server now has the information to calculate the
+	keys used to encrypt the rest of the handshake.  It uses the following
+	information in this calculation:
+	<ul>
+	<li><a href="client-ephemeral-public.key">client public key</a> (from Client Hello)
+	<li><a href="server-ephemeral-private.key">server private key</a> (from Server Key Exchange Generation)
+	<li>SHA256 hash of ClientHello and ServerHello</li>
+	</ul>
+	The server multiplies the client's public key with the
+	server's private key using the curve25519() algorithm.  The
+	32-byte result is called the shared secret, and is found
+	to be:
+	<pre class="ind2"><tt class="longboi">df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624</tt></pre>
+
+	I've provided <a href="files/curve25519-mult.c">a tool</a> to perform this calculation:
+	<codesample>
+<pre><code>$ cc -o curve25519-mult curve25519-mult.c
+$ ./curve25519-mult server-ephemeral-private.key \
+                    client-ephemeral-public.key | hexdump
+
+0000000 df 4a 29 1b aa 1e b7 cf a6 93 4b 29 b4 74 ba ad
+0000010 26 97 e2 9f 1f 92 0d cc 77 c8 a0 a0 88 44 76 24
+</code></pre>
+	</codesample>
+
+	We then calculate the SHA256 hash of all handshake messages
+	to this point (ClientHello and ServerHello).  The hash does
+	not include the 5-byte "record" headers.  This "hello_hash"
+	is <tt class="longboi">fcf5f66de7199fb7b285bed426cc945d3635512a7a9b866c94975475956df7e2</tt>.
+	<br/><br/>
+
+	We then feed the hash and the shared secret into a set of key derivation
+	operations using the HKDF algorithm:
+
+<pre>early_secret = HKDF-Extract(
+    salt=00,
+    key=00...)
+empty_hash = SHA256("")
+derived_secret = HKDF-Expand-Label(
+    key = early_secret,
+    label = "derived",
+    context = empty_hash,
+    len = 32)
+handshake_secret = HKDF-Extract(
+    salt = derived_secret,
+    key = shared_secret)
+client_handshake_traffic_secret = HKDF-Expand-Label(
+    key = handshake_secret,
+    label = "c hs traffic",
+    context = hello_hash,
+    len = 32)
+server_handshake_traffic_secret = HKDF-Expand-Label(
+    key = handshake_secret,
+    label = "s hs traffic",
+    context = hello_hash,
+    len = 32)
+client_handshake_key = HKDF-Expand-Label(
+    key = client_handshake_traffic_secret,
+    label = "key",
+    context = "",
+    len = 16)
+server_handshake_key = HKDF-Expand-Label(
+    key = server_handshake_traffic_secret,
+    label = "key",
+    context = "",
+    len = 16)
+client_handshake_iv = HKDF-Expand-Label(
+    key = client_handshake_traffic_secret,
+    label = "iv",
+    context = "",
+    len = 12)
+server_handshake_iv = HKDF-Expand-Label(
+    key = server_handshake_traffic_secret,
+    label = "iv",
+    context = "",
+    len = 12)
+</pre>
+
+	I've created <a href="files/hkdf.sh">an HKDF tool</a> to perform these operations on the command line.
+	<codesample>
+<pre><code>$ hello_hash=fcf5f66de7199fb7b285bed426cc945d3635512a7a9b866c94975475956df7e2
+$ shared_secret=df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624
+$ zero_key=0000000000000000000000000000000000000000000000000000000000000000
+$ early_secret=$(./hkdf extract 00 $zero_key)
+$ empty_hash=$(openssl sha256 < /dev/null)
+$ derived_secret=$(./hkdf expandlabel $early_secret "derived" $empty_hash 32)
+$ handshake_secret=$(./hkdf extract $derived_secret $shared_secret)
+$ csecret=$(./hkdf expandlabel $handshake_secret "c hs traffic" $hello_hash 32)
+$ ssecret=$(./hkdf expandlabel $handshake_secret "s hs traffic" $hello_hash 32)
+$ client_handshake_key=$(./hkdf expandlabel $csecret "key" "" 16)
+$ server_handshake_key=$(./hkdf expandlabel $ssecret "key" "" 16)
+$ client_handshake_iv=$(./hkdf expandlabel $csecret "iv" "" 12)
+$ server_handshake_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
+</code></pre>
+	</codesample>
+
+	From this we get the following key data:
+	<ul>
+	<li>handshake secret: <tt class="longboi">fb9fc80689b3a5d02c33243bf69a1b1b20705588a794304a6e7120155edf149a</tt>
+	<li>client handshake traffic secret: <tt class="longboi">66afa331b2e837d9ee285c12047b0a80a757f917ddbfa873e1abc579da297401</tt>.
+	<li>server handshake traffic secret: <tt class="longboi">a56045661f3bfed8ff504c40d0c49a6cb82aebfa185eb7f52f2a915b5a292754</tt>.
+	<li>client handshake key: <tt class="longboi">bd75f8a10bf81727cba7b7930f2d2d08</tt>
+	<li>server handshake key: <tt class="longboi">b567abf4246f473edad4efd363c5c8ad</tt>
+	<li>client handshake IV: <tt class="longboi">80852b60fb8bf887aa6a22d1</tt>
+	<li>server handshake IV: <tt class="longboi">99dc72e32ed29ca25ffe44a5</tt>
+	</ul>
+</div>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="calculation client">
+<div class="rec-label">Client Handshake Keys Calc</div>
+<img class="illustration" src="images/key8.png" width="97" height="250"/>
+<div class="rec-explanation">
+	The client now has the information to calculate the
+	keys that used to encrypt the rest of the handshake.  It uses the following
+	information in this calculation:
+	<ul>
+	<li><a href="server-ephemeral-public.key">server public key</a> (from Server Hello)
+	<li><a href="client-ephemeral-private.key">client private key</a> (from Client Key Exchange Generation)
+	<li>SHA256 hash of ClientHello and ServerHello</li>
+	</ul>
+	The client multiplies the server's public key with the
+	client's private key using the curve25519() algorithm.  The
+	32-byte result is called the shared secret, and is found
+	to be:
+	<pre class="ind2"><tt class="longboi">df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624</tt></pre>
+
+	I've provided <a href="files/curve25519-mult.c">a tool</a> to perform this calculation:
+	<codesample>
+<pre><code>$ cc -o curve25519-mult curve25519-mult.c
+$ ./curve25519-mult client-ephemeral-private.key \
+                    server-ephemeral-public.key | hexdump
+
+0000000 df 4a 29 1b aa 1e b7 cf a6 93 4b 29 b4 74 ba ad
+0000010 26 97 e2 9f 1f 92 0d cc 77 c8 a0 a0 88 44 76 24
+</code></pre>
+	</codesample>
+	Since this is the same shared secret calculated by the
+	server in "Server Handshake Keys Calc", the rest of
+	the calculation is identical and the same values are found:
+	<ul>
+	<li>client handshake key: <tt class="longboi">bd75f8a10bf81727cba7b7930f2d2d08</tt>
+	<li>server handshake key: <tt class="longboi">b567abf4246f473edad4efd363c5c8ad</tt>
+	<li>client handshake IV: <tt class="longboi">80852b60fb8bf887aa6a22d1</tt>
+	<li>server handshake IV: <tt class="longboi">99dc72e32ed29ca25ffe44a5</tt>
+	</ul>
+</div>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record server">
+<div class="rec-label">Server Change Cipher Spec</div>
+<div class="rec-explanation">
+	This record is no longer needed.  When the client requests
+	"middlebox compatibility mode" by providing a non-empty
+	Session ID this record is sent to help disguise the session
+	as a resumed TLS 1.2 session.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+ 14 03 03 00 01 01
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<ul>
+			<li><tt>14</tt> - type is 0x14 (ChangeCipherSpec record)
+			<li><tt>03 03</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>00 01</tt> - the length of the record payload is 0x1 (1) bytes
+			<li><tt>01</tt> - the payload of this message is defined as the byte 0x01
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record server">
+<div class="rec-label">Server Handshake Wrapper</div>
+<img class="illustration" src="images/key2.png" width="124" height="250"/>
+<div class="rec-explanation">
+	The connection (including the handshake) is encrypted from
+	this point on.  The encryption of handshake data is new in
+	TLS 1.3.
+	<br/><br/>
+	To reduce issues with middleware
+	that blocks unrecognized TLS protocols, the encrypted handshake is
+	disguised as a TLS 1.2 session that has performed a successful
+	session resume.
+	<br/><br/>
+	This TLS 1.2 wrapper only adds a single byte of overhead
+	(the wrapped record type).  This is more than made up for
+	by our cipher suite's lack of padding and EIV overhead.
+COPY THIS
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+ 17 03 03 04 75
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<ul>
+			<li><tt>17</tt> - type is 0x17 (application data)
+			<li><tt>03 03</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>04 75</tt> - the length of the record payload is 0x475 (1141) bytes
+			</ul>
+			All data following this header is the encrypted payload of this record.
+		</div>
+	</span>
+
+	<span class="string encrypted">
+		<span class="label">Encrypted Data</span>
+		<span class="bytes">
+ 03 3b 36 7c 23 7e 67 28 56 ae 20 e1 e4 67 61 f6 e6 1d bd d3 89 29 26 4c f2 5f 28 19 15 ba 73 51
+ b7 bf 29 44 55 49 d1 b1 d9 76 ee a3 32 6c ca 7b c7 9f 7d 67 74 bd 5c 54 15 2c 9d 9c de 33 31 36
+ 2e ff ac 28 68 bc 15 94 c6 ca c7 b1 0d a3 01 87 cf 60 8b 1f a3 1d 6d 4b 61 8e 73 fa 09 9f e9 61
+ 5e 23 4e be 2e 73 90 cb 89 79 e1 b4 6d e7 c6 3b 27 fe 28 93 28 23 af 54 83 bf e5 89 34 79 28 aa
+ 6a a4 de 00 32 7d 22 ec d4 fe 22 9e e8 91 f9 ca 3e 9d a9 ef 10 06 30 6e ee 31 2f 57 93 9b 36 95
+ 06 49 6f a3 4a 16 08 c3 16 01 fb 6d e3 f0 53 0a 74 c9 d1 00 4c 19 50 3d 87 65 9f 53 17 a9 4d 7e
+ 0a 68 e1 9b 26 9a bf 04 c7 f3 5f ba 15 2e 02 0d f3 bd 64 b5 a3 5c cf 5a d9 af 92 29 e9 c7 66 47
+ f6 7d ae 29 f8 e3 8b 9f 13 11 9b fc b2 96 fb f2 01 44 af 7d 0e 8c 0a 6d ff b2 e1 70 90 5e 01 01
+ b9 82 cc dd 1c 29 d6 74 06 f2 01 67 c0 be 31 3a 63 78 af 87 d9 0f 0c 3d 51 2e ea 25 4c 3c f4 5e
+ 0f 4d 41 cc 94 9f 40 47 9c 81 cf 20 bd 88 69 45 0e 22 b6 8c 79 c9 db 4b 17 a7 54 13 09 da 65 72
+ 7e 39 88 82 2b 7b b4 92 8f d1 9c 1b 10 9f 12 aa ad 37 ff 6a 16 ad be 3e fd b9 ae 53 50 6e 33 e3
+ 64 e7 25 e1 3c 7b 3c a6 6d 37 1a 2c 7a 8a f3 24 b0 51 64 81 7b 26 05 8b 0b 40 1f 23 51 87 dc 1b
+ 77 d5 ec d4 3a d4 36 03 fe 21 f4 76 05 ea 44 e7 b8 b9 89 8b de 3f 8a b4 93 6e d8 d0 90 f8 40 6a
+ aa f7 2f 3e 92 ca 38 73 c7 ae 96 3c 98 f9 49 a1 b5 68 74 ed 14 a4 a2 fe ee 33 a9 86 8f 61 d7 38
+ 9b 74 5a 97 1b 9d 21 e7 b4 96 aa d5 1c 52 51 fc 24 05 91 eb 84 1b 0b ec 73 1a b9 99 36 e6 61 ed
+ 21 99 ee b0 4b 52 f5 b1 93 bb 98 33 a1 64 12 b7 dd d6 db 15 70 2c 30 43 88 1a 1e 0b fb e6 5e 73
+ 9c 20 f1 3b 78 0d 54 54 68 83 7c 91 ba 2d 0f 90 39 4f af 6e 18 32 6c 54 c6 37 8a 54 11 c9 94 0c
+ 14 a6 33 ab 68 3d 19 e5 55 20 44 e4 8d 08 76 30 38 20 11 5c 2c 4a 1d f5 39 44 8e 67 2d ac 2d 14
+ 02 3e 8c 51 2e b5 fc 1b b4 ea 1c c2 2d 6d ed 42 0d 4c be b1 b3 f6 a5 98 73 c8 90 d9 df 17 ba df
+ c9 16 6c c1 a2 1c 49 46 36 79 30 f4 4e 91 ef f2 8a 8d aa 7c 3c 79 b0 10 c1 3b bd 81 67 90 8f c1
+ d7 a9 c2 a0 b3 ad 87 4a fa 96 35 96 ba 42 95 4f f5 af 23 77 94 6c d3 56 aa 1f a6 2a a2 ec a7 9e
+ 99 d2 23 cf 14 83 a6 b1 e5 a8 5a a6 23 bc 16 df 03 0e 7b bf a6 ee 13 00 e2 ef 2e 29 01 c7 f0 42
+ 3f 4d e0 0c 7a 87 45 10 08 e5 54 03 e1 4a 45 d0 40 50 65 c3 0b 12 0d 16 2e 54 49 81 4f f2 59 ee
+ 67 d8 d6 eb 26 67 4d e6 4e e7 a0 22 3b 2f a8 e9 2f 5c 1d a1 9d 4d ee 66 b0 f2 65 41 a2 35 1c 96
+ 61 42 7a 7a 48 cd d0 88 6b 62 45 f1 8d 03 6c cb ba c2 7d ea 2a bd cc fa cb 27 f8 3e 18 ff f3 9a
+ 6b d8 b2 e1 fc d8 50 52 ee 16 cf 88 0d d4 7a 3c 27 b9 79 0d 93 06 b8 ad 6b 63 eb 9b f4 c6 cc de
+ 00 f9 cd 0f d2 04 91 b0 c9 35 2a 07 51 67 37 89 2d 34 5f 9a 5f 71 d8 04 1c 59 fb 60 71 01 a2 d8
+ 19 2b d3 53 b5 57 b2 09 8b 85 52 88 c1 2b 0a 39 58 e7 79 22 96 cf c3 df d7 09 44 9e 74 87 01 4c
+ 6f 78 ea dd d8 4f 88 c0 cd eb 2b 86 6d ca 95 0d 61 15 95 3f d7 d1 b7 09 d5 a7 69 6c bd 9e 7d 69
+ 78 74 7c 94 9b a0 90 fd 11 72 db 10 cf 84 6a a9 c5 d8 e5 14 60 cf c5 b2 23 89 ed d0 4c ce 9b 9f
+ f6 6f f3 22 1f 4a 7f b9 e7 0e c2 02 bd 9a 0b 55 5b eb 4b 4e 70 4b 1b c8 ec 8b a4 c0 20 99 15 b8
+ 98 a6 94 2c 1b 85 62 2a b5 05 16 14 7c f7 9b de bb eb db 62 a8 d2 d7 6b 49 ae d4 78 b3 1f de 8e
+ cc 7a 1d 18 96 fe a4 9c 57 7a c8 d7 b1 21 b7 60 76 6d 42 48 e0 c4 de 79 2a 4d 3d dc cf f9 70 a6
+ b6 4a 6c 3e 85 00 6a 27 e7 80 05 31 09 e0 13 34 62 7e 62 ef f2 e9 4c 97 d0 83 2b 51 a3 39 24 fc
+ 23 4a ae ef cd 40 43 b6 cc 46 a1 89 3b a2 a7 16 b4 e1 de 41 aa 85 06 b9 1e bc c1 09 8d d0 08 4f
+ 45 97 87 b0 49
+		</span>
+		<div class="explanation">
+			This data is encrypted with the server handshake key.
+			<br/><br/>
+			The decrypted data will be shown later in the record.
+		</div>
+	</span>
+	<span class="string encrypted">
+		<span class="label">Auth Tag</span>
+		<span class="bytes">
+ ef fe 69 ce 8d f8 af 2d c9 32 27 b2 a2 7d fd f2
+		</span>
+		<div class="explanation">
+			This is the AEAD authentication tag
+			that protects the integrity of the
+			encrypted data and its record header.
+		</div>
+	</span>
+
+	<div class="decryption">
+		<div class="label">Decryption</div>
+		<div class="explanation">
+			This data is encrypted using the server
+			handshake key and the server handshake IV that were
+			generated during the "Server Handshake Keys
+			Calc" step.  The IV will be modified
+			by XOR'ing it by the count of records that
+			have already been encrypted with this key,
+			which in thise case is 0.  The process also
+			takes as input the 5-byte record header
+			that this record begins with, as authenticated
+			data that must match for the decryption to
+			succeed.
+			<br/><br/>
+			Because the <tt>openssl</tt> command line
+			tool does not yet support the AEAD ciphers,
+			I've written command line tools to both
+			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			this data.
+			<codesample>
+<pre><code>### from the "Server Handshake Keys Calc" step
+$ key=b567abf4246f473edad4efd363c5c8ad
+$ iv=99dc72e32ed29ca25ffe44a5
+### from this record
+$ recdata=1703030475
+$ authtag=effe69ce8df8af2dc93227b2a27dfdf2
+$ recordnum=0
+### may need to add -I and -L flags for include and lib dirs
+$ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
+$ echo "03 3b 36 7c 23 7e 67 28 56 ae 20 e1 e4 67 61 f6 e6 1d bd d3 89 29
+  ... snip ...
+  a7 16 b4 e1 de 41 aa 85 06 b9 1e bc c1 09 8d d0 08 4f 45 97 87 b0
+  49 " | xxd -r -p > /tmp/msg1
+$ cat /tmp/msg1 \
+  | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
+  | hexdump -C
+
+00000000  08 00 00 02 00 00 0b 00  03 2e 00 00 03 2a 00 03  |.............*..|
+00000010  25 30 82 03 21 30 82 02  09 a0 03 02 01 02 02 08  |ef..!0..........|
+00000020  15 5a 92 ad c2 04 8f 90  30 0d 06 09 2a 86 48 86  |.Z......0...*.H.|
+... snip ...
+</code></pre>
+			</codesample>
+		</div>
+	</div>
+
+	<span class="string decrypted">
+		<span class="label">Encrypted Extensions</span>
+		<span class="bytes">
+ 08 00 00 02 00 00
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Server Certificate</span>
+		<span class="bytes">
+ 0b 00 03 2e 00 00 03 2a 00 03 25 30 82 03 21 30 82 02 09 a0 03 02 01 02 02 08 15 5a 92 ad c2 04
+ 8f 90 30 0d 06 09 2a 86 48 86 f7 0d 01 01 0b 05 00 30 22 31 0b 30 09 06 03 55 04 06 13 02 55 53
+ 31 13 30 11 06 03 55 04 0a 13 0a 45 78 61 6d 70 6c 65 20 43 41 30 1e 17 0d 31 38 31 30 30 35 30
+ 31 33 38 31 37 5a 17 0d 31 39 31 30 30 35 30 31 33 38 31 37 5a 30 2b 31 0b 30 09 06 03 55 04 06
+ 13 02 55 53 31 1c 30 1a 06 03 55 04 03 13 13 65 78 61 6d 70 6c 65 2e 75 6c 66 68 65 69 6d 2e 6e
+ 65 74 30 82 01 22 30 0d 06 09 2a 86 48 86 f7 0d 01 01 01 05 00 03 82 01 0f 00 30 82 01 0a 02 82
+ 01 01 00 c4 80 36 06 ba e7 47 6b 08 94 04 ec a7 b6 91 04 3f f7 92 bc 19 ee fb 7d 74 d7 a8 0d 00
+ 1e 7b 4b 3a 4a e6 0f e8 c0 71 fc 73 e7 02 4c 0d bc f4 bd d1 1d 39 6b ba 70 46 4a 13 e9 4a f8 3d
+ f3 e1 09 59 54 7b c9 55 fb 41 2d a3 76 52 11 e1 f3 dc 77 6c aa 53 37 6e ca 3a ec be c3 aa b7 3b
+ 31 d5 6c b6 52 9c 80 98 bc c9 e0 28 18 e2 0b f7 f8 a0 3a fd 17 04 50 9e ce 79 bd 9f 39 f1 ea 69
+ ec 47 97 2e 83 0f b5 ca 95 de 95 a1 e6 04 22 d5 ee be 52 79 54 a1 e7 bf 8a 86 f6 46 6d 0d 9f 16
+ 95 1a 4c f7 a0 46 92 59 5c 13 52 f2 54 9e 5a fb 4e bf d7 7a 37 95 01 44 e4 c0 26 87 4c 65 3e 40
+ 7d 7d 23 07 44 01 f4 84 ff d0 8f 7a 1f a0 52 10 d1 f4 f0 d5 ce 79 70 29 32 e2 ca be 70 1f df ad
+ 6b 4b b7 11 01 f4 4b ad 66 6a 11 13 0f e2 ee 82 9e 4d 02 9d c9 1c dd 67 16 db b9 06 18 86 ed c1
+ ba 94 21 02 03 01 00 01 a3 52 30 50 30 0e 06 03 55 1d 0f 01 01 ff 04 04 03 02 05 a0 30 1d 06 03
+ 55 1d 25 04 16 30 14 06 08 2b 06 01 05 05 07 03 02 06 08 2b 06 01 05 05 07 03 01 30 1f 06 03 55
+ 1d 23 04 18 30 16 80 14 89 4f de 5b cc 69 e2 52 cf 3e a3 00 df b1 97 b8 1d e1 c1 46 30 0d 06 09
+ 2a 86 48 86 f7 0d 01 01 0b 05 00 03 82 01 01 00 59 16 45 a6 9a 2e 37 79 e4 f6 dd 27 1a ba 1c 0b
+ fd 6c d7 55 99 b5 e7 c3 6e 53 3e ff 36 59 08 43 24 c9 e7 a5 04 07 9d 39 e0 d4 29 87 ff e3 eb dd
+ 09 c1 cf 1d 91 44 55 87 0b 57 1d d1 9b df 1d 24 f8 bb 9a 11 fe 80 fd 59 2b a0 39 8c de 11 e2 65
+ 1e 61 8c e5 98 fa 96 e5 37 2e ef 3d 24 8a fd e1 74 63 eb bf ab b8 e4 d1 ab 50 2a 54 ec 00 64 e9
+ 2f 78 19 66 0d 3f 27 cf 20 9e 66 7f ce 5a e2 e4 ac 99 c7 c9 38 18 f8 b2 51 07 22 df ed 97 f3 2e
+ 3e 93 49 d4 c6 6c 9e a6 39 6d 74 44 62 a0 6b 42 c6 d5 ba 68 8e ac 3a 01 7b dd fc 8e 2c fc ad 27
+ cb 69 d3 cc dc a2 80 41 44 65 d3 ae 34 8c e0 f3 4a b2 fb 9c 61 83 71 31 2b 19 10 41 64 1c 23 7f
+ 11 a5 d6 5c 84 4f 04 04 84 99 38 71 2b 95 9e d6 85 bc 5c 5d d6 45 ed 19 90 94 73 40 29 26 dc b4
+ 0e 34 69 a1 59 41 e8 e2 cc a8 4b b6 08 46 36 a0 00 00
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Server Certificate Verify</span>
+		<span class="bytes">
+ 0f 00 01 04 08 04 01 00 2c f8 ec e7 24 28 04 93 4b 58 ef 48 79 4c 25 2b d3 4a d1 0a ed ff f9 30
+ ca 05 a3 16 9a 59 17 66 8f 39 9d 43 fc db af 2b 1c 17 4d 52 d7 25 17 4d b9 c7 54 c7 9b 63 30 3b
+ e7 2d e1 83 7f 68 2f 6a 94 d3 55 de 74 c3 d0 4d 6d 61 24 14 c9 b5 ec 28 57 61 27 1c 68 f5 ce 66
+ b7 c2 fb 65 36 19 98 26 fc 41 fe 61 23 fc 80 06 b4 25 fd 4b 03 a3 42 1e 91 fb 4b 63 f7 a3 14 e1
+ 95 17 b7 f1 74 56 f5 66 67 b5 ba 81 d7 59 d3 5d 21 f0 ed 76 14 a8 98 99 97 9e 99 2f 37 ab d7 f2
+ 25 0c 7d dd 45 3b f8 12 b6 fe 99 ff 18 aa ac 86 80 78 55 32 d7 cd 27 fd ed 16 7f c8 9a bd 44 ec
+ e7 8d 1a 69 ec 71 37 0f 0a 32 b0 b9 7a 6c 22 4e e9 d6 a5 eb 26 36 51 42 1d bd dd 53 91 c8 5b 3e
+ 9b 66 42 35 79 7c 0c 31 82 0e 3e 67 5a a2 46 9a 98 28 7c 5e 4f cd 80 be d5 54 7a af 8a 80 b8 0c
+ fc 11 db a1 b4 3a 4a c2
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Server Finished</span>
+		<span class="bytes">
+ 14 00 00 20 a2 b2 2c 83 f1 b0 16 37 d5 7b fa 85 3d 61 a2 70 57 fd de eb f9 75 ec 03 67 b9 36 82
+ c8 0e da 14
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Record Type</span>
+		<span class="bytes">
+ 16
+		</span>
+		<div class="explanation">
+			Each TLS 1.3 record disguised as TLS 1.2
+			application data has a final byte
+			which indicates its actual record type.
+			<ul>
+			<li><tt>16</tt> - type is 0x16 (handshake record)
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record server embedded">
+<div class="rec-label">Server Encrypted Extensions</div>
+<div class="rec-explanation">
+	Any extensions that aren't needed for negotiating encryption
+	keys should be listed here so they can be hidden from
+	eavesdroppers.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+ 08 00 00 02
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>08</tt> - handshake message type 0x08 (encrypted extensions)
+			<li><tt>00 00 02</tt> - payload length of 0x2 (2) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Extensions</span>
+		<span class="bytes">
+ 00 00
+		</span>
+		<div class="explanation">
+			<ul>
+			<li><tt>00 00</tt> - 0x0 (0) bytes of extension data follows
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record server embedded">
+<div class="rec-label">Server Certificate</div>
+<img class="illustration" src="images/key3.png" width="130" height="250"/>
+<div class="rec-explanation">
+	The server provides a certificate containing the following:
+	<ul>
+	<li>the hostname of the server
+	<li>the public key used by this server
+	<li>proof from a trusted third party that the owner of this hostname holds the private key for this public key
+	</ul>
+	<a href="certificate.html" target="_blank">Explore the server certificate</a>.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+ 0b 00 03 2e
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>0b</tt> - handshake message type 0x0B (certificate)
+			<li><tt>00 03 2e</tt> - payload length of 0x32E (814) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Request Context</span>
+		<span class="bytes">
+ 00
+		</span>
+		<div class="explanation">
+			This record is empty because this certificate was not sent in
+			response to a Certificate Request.
+			<ul>
+			<li><tt>00</tt> - 0x0 (0) bytes of request context follows
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Certificates Length</span>
+		<span class="bytes">
+ 00 03 2a
+		</span>
+		<div class="explanation">
+			<ul>
+			<li><tt>00 03 2a</tt> - 0x32A (810) bytes of certificates follow
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Certificate Length</span>
+		<span class="bytes">
+ 00 03 25
+		</span>
+		<div class="explanation">
+			The length of the first (and only) certificate.
+			<ul>
+			<li><tt>00 03 25</tt> - 0x325 (805) bytes of certificate follows
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Certificate</span>
+		<span class="bytes">
+ 30 82 03 21 30 82 02 09 a0 03 02 01 02 02 08 15 5a 92 ad c2 04 8f 90 30 0d 06 09 2a 86 48 86 f7
+ 0d 01 01 0b 05 00 30 22 31 0b 30 09 06 03 55 04 06 13 02 55 53 31 13 30 11 06 03 55 04 0a 13 0a
+ 45 78 61 6d 70 6c 65 20 43 41 30 1e 17 0d 31 38 31 30 30 35 30 31 33 38 31 37 5a 17 0d 31 39 31
+ 30 30 35 30 31 33 38 31 37 5a 30 2b 31 0b 30 09 06 03 55 04 06 13 02 55 53 31 1c 30 1a 06 03 55
+ 04 03 13 13 65 78 61 6d 70 6c 65 2e 75 6c 66 68 65 69 6d 2e 6e 65 74 30 82 01 22 30 0d 06 09 2a
+ 86 48 86 f7 0d 01 01 01 05 00 03 82 01 0f 00 30 82 01 0a 02 82 01 01 00 c4 80 36 06 ba e7 47 6b
+ 08 94 04 ec a7 b6 91 04 3f f7 92 bc 19 ee fb 7d 74 d7 a8 0d 00 1e 7b 4b 3a 4a e6 0f e8 c0 71 fc
+ 73 e7 02 4c 0d bc f4 bd d1 1d 39 6b ba 70 46 4a 13 e9 4a f8 3d f3 e1 09 59 54 7b c9 55 fb 41 2d
+ a3 76 52 11 e1 f3 dc 77 6c aa 53 37 6e ca 3a ec be c3 aa b7 3b 31 d5 6c b6 52 9c 80 98 bc c9 e0
+ 28 18 e2 0b f7 f8 a0 3a fd 17 04 50 9e ce 79 bd 9f 39 f1 ea 69 ec 47 97 2e 83 0f b5 ca 95 de 95
+ a1 e6 04 22 d5 ee be 52 79 54 a1 e7 bf 8a 86 f6 46 6d 0d 9f 16 95 1a 4c f7 a0 46 92 59 5c 13 52
+ f2 54 9e 5a fb 4e bf d7 7a 37 95 01 44 e4 c0 26 87 4c 65 3e 40 7d 7d 23 07 44 01 f4 84 ff d0 8f
+ 7a 1f a0 52 10 d1 f4 f0 d5 ce 79 70 29 32 e2 ca be 70 1f df ad 6b 4b b7 11 01 f4 4b ad 66 6a 11
+ 13 0f e2 ee 82 9e 4d 02 9d c9 1c dd 67 16 db b9 06 18 86 ed c1 ba 94 21 02 03 01 00 01 a3 52 30
+ 50 30 0e 06 03 55 1d 0f 01 01 ff 04 04 03 02 05 a0 30 1d 06 03 55 1d 25 04 16 30 14 06 08 2b 06
+ 01 05 05 07 03 02 06 08 2b 06 01 05 05 07 03 01 30 1f 06 03 55 1d 23 04 18 30 16 80 14 89 4f de
+ 5b cc 69 e2 52 cf 3e a3 00 df b1 97 b8 1d e1 c1 46 30 0d 06 09 2a 86 48 86 f7 0d 01 01 0b 05 00
+ 03 82 01 01 00 59 16 45 a6 9a 2e 37 79 e4 f6 dd 27 1a ba 1c 0b fd 6c d7 55 99 b5 e7 c3 6e 53 3e
+ ff 36 59 08 43 24 c9 e7 a5 04 07 9d 39 e0 d4 29 87 ff e3 eb dd 09 c1 cf 1d 91 44 55 87 0b 57 1d
+ d1 9b df 1d 24 f8 bb 9a 11 fe 80 fd 59 2b a0 39 8c de 11 e2 65 1e 61 8c e5 98 fa 96 e5 37 2e ef
+ 3d 24 8a fd e1 74 63 eb bf ab b8 e4 d1 ab 50 2a 54 ec 00 64 e9 2f 78 19 66 0d 3f 27 cf 20 9e 66
+ 7f ce 5a e2 e4 ac 99 c7 c9 38 18 f8 b2 51 07 22 df ed 97 f3 2e 3e 93 49 d4 c6 6c 9e a6 39 6d 74
+ 44 62 a0 6b 42 c6 d5 ba 68 8e ac 3a 01 7b dd fc 8e 2c fc ad 27 cb 69 d3 cc dc a2 80 41 44 65 d3
+ ae 34 8c e0 f3 4a b2 fb 9c 61 83 71 31 2b 19 10 41 64 1c 23 7f 11 a5 d6 5c 84 4f 04 04 84 99 38
+ 71 2b 95 9e d6 85 bc 5c 5d d6 45 ed 19 90 94 73 40 29 26 dc b4 0e 34 69 a1 59 41 e8 e2 cc a8 4b
+ b6 08 46 36 a0
+		</span>
+		<div class="explanation">
+			The certificate is in ASN.1 DER
+			encoding.  The details of this format and
+			the content of this binary payload are
+			documented <a href="certificate.html" target="_blank">on another page</a>.
+			<a href="files/server.crt" download="server.crt">The certificate</a>
+			can be converted to the binary data in this message
+			at the command line:
+			<codesample>
+<pre><code>$ openssl x509 -outform der &lt; server.crt | hexdump
+
+0000000 30 82 03 21 30 82 02 09 a0 03 02 01 02 02 08 15
+0000010 5a 92 ad c2 04 8f 90 30 0d 06 09 2a 86 48 86 f7
+... snip ...
+</code></pre>
+			</codesample>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Certificate Extensions</span>
+		<span class="bytes">
+ 00 00
+		</span>
+		<div class="explanation">
+			The server can provide extension data for the certificate.
+			<ul>
+			<li><tt>00 00</tt> - 0x0 (0) bytes of extension data follows
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record server embedded">
+<div class="rec-label">Server Certificate Verify</div>
+<img class="illustration" src="images/key5.png" width="138" height="250"/>
+<div class="rec-explanation">
+	The server provides information that ties the public key
+	generated during Client Key Exchange Generation to the
+	ownership of the certificate's private key.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+ 0f 00 01 04
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>0f</tt> - handshake message type 0x0f (certificate verify)
+			<li><tt>00 01 04</tt> - payload length of 0x104 (260) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Signature</span>
+		<span class="bytes">
+ 08 04 01 00 2c f8 ec e7 24 28 04 93 4b 58 ef 48 79 4c 25 2b d3 4a d1 0a ed ff f9 30 ca 05 a3 16
+ 9a 59 17 66 8f 39 9d 43 fc db af 2b 1c 17 4d 52 d7 25 17 4d b9 c7 54 c7 9b 63 30 3b e7 2d e1 83
+ 7f 68 2f 6a 94 d3 55 de 74 c3 d0 4d 6d 61 24 14 c9 b5 ec 28 57 61 27 1c 68 f5 ce 66 b7 c2 fb 65
+ 36 19 98 26 fc 41 fe 61 23 fc 80 06 b4 25 fd 4b 03 a3 42 1e 91 fb 4b 63 f7 a3 14 e1 95 17 b7 f1
+ 74 56 f5 66 67 b5 ba 81 d7 59 d3 5d 21 f0 ed 76 14 a8 98 99 97 9e 99 2f 37 ab d7 f2 25 0c 7d dd
+ 45 3b f8 12 b6 fe 99 ff 18 aa ac 86 80 78 55 32 d7 cd 27 fd ed 16 7f c8 9a bd 44 ec e7 8d 1a 69
+ ec 71 37 0f 0a 32 b0 b9 7a 6c 22 4e e9 d6 a5 eb 26 36 51 42 1d bd dd 53 91 c8 5b 3e 9b 66 42 35
+ 79 7c 0c 31 82 0e 3e 67 5a a2 46 9a 98 28 7c 5e 4f cd 80 be d5 54 7a af 8a 80 b8 0c fc 11 db a1
+ b4 3a 4a c2
+		</span>
+		<div class="explanation">
+			Because the server is generating ephemeral
+			keys for each connection it is not using
+			the public key provided in the server
+			certificate.  To prove that the server owns
+			the server certificate (giving the certificate
+			validity in this TLS session), it signs the
+			ephemeral public key with the certificate's
+			private key.  This signature can be validated
+			with the certificate's public key.
+			<ul>
+			<li><tt>08 04</tt> - reserved value for RSA-PSS-RSAE-SHA256 signature
+			<li><tt>01 00</tt> - length of signature (0x100 or 256 bytes)
+XXX
+			<li><tt>2c f8 ec ... 3a 4a c2</tt> - XXX the
+					computed signature for <tt>SHA256(client_hello_random
+					+ server_hello_random + curve_info + public_key)</tt>
+			</ul>
+			We can compute the signature ourselves using
+			the <a href="files/server.key" download="server.key">server's private key</a>,
+			at the command line:
+			<codesample>
+<pre><code>
+XXX
+### client random from Client Hello
+$ echo -en '\x00\x01\x02\x03\x04\x05\x06\x07'  > /tmp/compute
+$ echo -en '\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f' >> /tmp/compute
+$ echo -en '\x10\x11\x12\x13\x14\x15\x16\x17' >> /tmp/compute
+$ echo -en '\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f' >> /tmp/compute
+### server random from Server Hello
+$ echo -en '\x70\x71\x72\x73\x74\x75\x76\x77' >> /tmp/compute
+$ echo -en '\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f' >> /tmp/compute
+$ echo -en '\x80\x81\x82\x83\x84\x85\x86\x87' >> /tmp/compute
+$ echo -en '\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f' >> /tmp/compute
+### the curve info section from this message
+$ echo -en '\x03\x00\x1d' >> /tmp/compute
+### the public key sections from this msg
+$ echo -en '\x20\x9f\xd7\xad\x6d\xcf\xf4\x29' >> /tmp/compute
+$ echo -en '\x8d\xd3\xf9\x6d\x5b\x1b\x2a\xf9' >> /tmp/compute
+$ echo -en '\x10\xa0\x53\x5b\x14\x88\xd7\xf8' >> /tmp/compute
+$ echo -en '\xfa\xbb\x34\x9a\x98\x28\x80\xb6\x15' >> /tmp/compute
+$ openssl dgst -sign server.key -sha256 /tmp/compute | hexdump
+
+0000000 04 02 b6 61 f7 c1 91 ee 59 be 45 37 66 39 bd c3
+... snip ...
+00000f0 7d 87 dc 33 18 64 35 71 22 6c 4d d2 c2 ac 41 fb
+</code></pre>
+			</codesample>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record server embedded">
+<div class="rec-label">Server Handshake Finished</div>
+<div class="rec-explanation">
+	To verify that the handshake was successful and not tampered
+	with, the server calculates verification data.
+	The verification data is built from a hash of all handshake
+	messages and verifies the integrity of the handshake process.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+ 14 00 00 20
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>10</tt> - handshake message type 0x14 (finished)
+			<li><tt>00 00 20</tt> - payload length of 0x20 (32) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Verify Data</span>
+		<span class="bytes">
+ a2 b2 2c 83 f1 b0 16 37 d5 7b fa 85 3d 61 a2 70 57 fd de eb f9 75 ec 03 67 b9 36 82 c8 0e da 14
+		</span>
+		<div class="explanation">
+			The verify_data is built using the
+			server_handshake_traffic_secret from
+			the "Server Handshake Keys Calc" step and
+			a SHA256 hash of every handshake record
+			from Client Hello to Server Certificate
+			Verify.
+<pre>finished_key = HKDF-Expand-Label(
+    key = server_handshake_traffic_secret,
+    label = "finished",
+    context = "",
+    len = 32)
+finished_hash = SHA256(Client Hello ... Cert Verify)
+verify_data = HMAC-SHA256(
+	key = finished_key,
+	data = finished_hash)
+</pre>
+			We can use <a href="files/hkdf.sh">the HKDF
+			tool</a> to reproduce this on the command line.
+			<codesample>
+<pre><code>$ sht_secret=a56045661f3bfed8ff504c40d0c49a6cb82aebfa185eb7f52f2a915b5a292754
+$ fin_hash=245258a185c1c133556fca79a53367212a93f513669e6bbbd39fde0e1fe171cf
+$ fin_key=$(./hkdf expandlabel $sht_secret "finished" "" 32)
+$ echo $fin_hash | xxd -r -p \
+  | openssl dgst -sha256 -mac HMAC -macopt hexkey:$fin_key
+
+a2b22c83f1b01637d57bfa853d61a27057fddeebf975ec0367b93682c80eda14
+</code></pre>
+			</codesample>
+		</div>
+	</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="calculation server">
+<div class="rec-label">Server Application Keys Calc</div>
+<img class="illustration" src="images/key9.png" width="97" height="250"/>
+<div class="rec-explanation">
+	The server now has the information to calculate the
+	keys used to encrypt application traffic.
+	It uses the following information in this calculation:
+	<ul>
+	<li>The handshake secret (from "Server Handshake Key Calc")
+	<li>The SHA256 hash of every handshake message from Client Hello to Server Handshake Finished</li>
+	</ul>
+	We calculate the SHA256 hash of all handshake messages to
+	this point (Client Hello, Server Hello, Encrypted Extensions,
+	Server Certificate, Server Certificate Verify, Server
+	Finished).  The hash does not include any of the 5-byte
+	"record" headers.  This "handshake_hash" is
+	<tt class="longboi">cf0e93f4536391568f51962b988c48ee2cdcaa553fe809bba89bfe4fe36f5cf3</tt>.
+	<br/><br/>
+	We then feed the hash and the handshake secret into a set of key derivation
+	operations using the HKDF algorithm:
+
+<pre>empty_hash = SHA256("")
+derived_secret = HKDF-Expand-Label(
+    key = handshake_secret,
+    label = "derived",
+    context = empty_hash,
+    len = 32)
+master_secret = HKDF-Extract(
+    salt=derived_secret,
+    key=00...)
+client_application_traffic_secret = HKDF-Expand-Label(
+    key = master_secret,
+    label = "c ap traffic",
+    context = handshake_hash,
+    len = 32)
+server_application_traffic_secret = HKDF-Expand-Label(
+    key = master_secret,
+    label = "s ap traffic",
+    context = handshake_hash,
+    len = 32)
+client_application_key = HKDF-Expand-Label(
+    key = client_application_traffic_secret,
+    label = "key",
+    context = "",
+    len = 16)
+server_application_key = HKDF-Expand-Label(
+    key = server_application_traffic_secret,
+    label = "key",
+    context = "",
+    len = 16)
+client_application_iv = HKDF-Expand-Label(
+    key = client_application_traffic_secret,
+    label = "iv",
+    context = "",
+    len = 12)
+server_application_iv = HKDF-Expand-Label(
+    key = server_application_traffic_secret,
+    label = "iv",
+    context = "",
+    len = 12)
+</pre>
+
+	I've created <a href="files/hkdf.sh">an HKDF tool</a> to perform these operations on the command line.
+	<codesample>
+<pre><code>$ handshake_hash=cf0e93f4536391568f51962b988c48ee2cdcaa553fe809bba89bfe4fe36f5cf3
+$ handshake_secret=fb9fc80689b3a5d02c33243bf69a1b1b20705588a794304a6e7120155edf149a
+$ zero_key=0000000000000000000000000000000000000000000000000000000000000000
+$ empty_hash=$(openssl sha256 < /dev/null)
+$ derived_secret=$(./hkdf expandlabel $handshake_secret "derived" $empty_hash 32)
+$ master_secret=$(./hkdf extract $derived_secret $zero_key)
+$ csecret=$(./hkdf expandlabel $master_secret "c ap traffic" $handshake_hash 32)
+$ ssecret=$(./hkdf expandlabel $master_secret "s ap traffic" $handshake_hash 32)
+$ client_application_key=$(./hkdf expandlabel $csecret "key" "" 16)
+$ server_application_key=$(./hkdf expandlabel $ssecret "key" "" 16)
+$ client_application_iv=$(./hkdf expandlabel $csecret "iv" "" 12)
+$ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
+</code></pre>
+	</codesample>
+
+	From this we get the following key data:
+	<ul>
+	<li>client application key: <tt class="longboi">2d78f5e75f8120d0a010e55553cdf540</tt>
+	<li>server application key: <tt class="longboi">81c6697a47c4aa4a810f86f2c8b46f1d</tt>
+	<li>client application IV: <tt class="longboi">2da36cce479d99a82597433e</tt>
+	<li>server application IV: <tt class="longboi">46bf93d546b87cc9ca63dba3</tt>
+	</ul>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="calculation client">
+<div class="rec-label">Client Application Keys Calc</div>
+<img class="illustration" src="images/key8.png" width="97" height="250"/>
+<div class="rec-explanation">
+	The client now has the information to calculate the
+	keys used to encrypt application traffic.
+	It performs the same calculation shown in "Server Application
+	Keys Calc" and finds the same values:
+	<ul>
+	<li>client application key: <tt class="longboi">2d78f5e75f8120d0a010e55553cdf540</tt>
+	<li>server application key: <tt class="longboi">81c6697a47c4aa4a810f86f2c8b46f1d</tt>
+	<li>client application IV: <tt class="longboi">2da36cce479d99a82597433e</tt>
+	<li>server application IV: <tt class="longboi">46bf93d546b87cc9ca63dba3</tt>
+	</ul>
+</div>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record client">
+<div class="rec-label">Client Change Cipher Spec</div>
+<div class="rec-explanation">
+	This record is no longer needed.  When the client requests
+	"middlebox compatibility mode" by providing a non-empty
+	Session ID this record is sent to help disguise the session
+	as a resumed TLS 1.2 session.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+ 14 03 03 00 01 01
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<ul>
+			<li><tt>14</tt> - type is 0x14 (ChangeCipherSpec record)
+			<li><tt>03 03</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>00 01</tt> - the length of the record payload is 0x1 (1) bytes
+			<li><tt>01</tt> - the payload of this message is defined as the byte 0x01
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record client">
+<div class="rec-label">Client Finished Wrapper</div>
+<div class="rec-explanation">
+	To reduce issues with middleware
+	that blocks unrecognized TLS protocols, the encrypted handshake is
+	disguised as a TLS 1.2 session that has performed a successful
+	session resume.
+	<br/><br/>
+	This TLS 1.2 wrapper only adds a single byte of overhead
+	(the wrapped record type).  This is more than made up for
+	by our cipher suite's lack of padding and EIV overhead.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+ 17 03 03 00 35
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<br/><br>
+			To reduce issues with middleware that
+			blocks unrecognized TLS
+			protocols, this record is disguised as TLS
+			1.2 application data.
+			<ul>
+			<li><tt>17</tt> - type is 0x17 (application data)
+			<li><tt>03 03</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>00 35</tt> - the length of the record payload is 0x35 (53) bytes
+			</ul>
+			All data following this header is the encrypted payload of the actual record.
+		</div>
+	</span>
+
+	<span class="string encrypted">
+		<span class="label">Encrypted Data</span>
+		<span class="bytes">
+ a7 e5 84 4d bf 37 02 fc a9 87 7f 65 aa 7c 87 cf 7a dd a5 43 fc 06 47 64 29 03 52 7c 52 11 8e 64
+ b9 50 65 86 30
+		</span>
+		<div class="explanation">
+			This data is encrypted with the client handshake key.
+			<br/><br/>
+			The decrypted data will be shown later in the record.
+		</div>
+	</span>
+	<span class="string encrypted">
+		<span class="label">Auth Tag</span>
+		<span class="bytes">
+ 78 cf 1f fd 51 0a 33 f9 c3 3d 31 c0 d9 98 45 ff
+		</span>
+		<div class="explanation">
+			This is the AEAD authentication tag
+			that protects the integrity of the
+			encrypted data and its record header.
+		</div>
+	</span>
+
+	<div class="decryption">
+		<div class="label">Decryption</div>
+		<div class="explanation">
+			This data is encrypted using the client
+			handshake key and the client handshake IV that were
+			generated during the "Client Handshake Keys
+			Calc" step.  The IV will be modified
+			by XOR'ing it by the count of records that
+			have already been encrypted with this key,
+			which in thise case is 0.  The process also
+			takes as input the 5-byte record header
+			that this record begins with, as authenticated
+			data that must match for the decryption to
+			succeed.
+			<br/><br/>
+			Because the <tt>openssl</tt> command line
+			tool does not yet support the AEAD ciphers,
+			I've written command line tools to both
+			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			this data.
+			<codesample>
+<pre><code>### from the "Client Handshake Keys Calc" step
+$ key=bd75f8a10bf81727cba7b7930f2d2d08
+$ iv=80852b60fb8bf887aa6a22d1
+### from this record
+$ recdata=1703030035
+$ authtag=78cf1ffd510a33f9c33d31c0d99845ff
+$ recordnum=0
+### may need to add -I and -L flags for include and lib dirs
+$ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
+$ echo "a7 e5 84 4d bf 37 02 fc a9 87 7f 65 aa 7c 87 cf 7a dd a5
+  43 fc 06 47 64 29 03 52 7c 52 11 8e 64 b9 50 65 86 30" \
+  | xxd -r -p > /tmp/msg2
+$ cat /tmp/msg2 \
+  | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
+  | hexdump -C
+
+00000000  14 00 00 20 0d b5 e0 6f  69 d7 34 36 d0 47 56 1a  |... ...oi.46.GV.|
+00000010  cd 8f 9f 60 a6 fe 93 e7  ec 6f 61 25 fa a1 59 8f  |...`.....oa%..Y.|
+00000020  d2 81 70 ec 16                                    |..p..|
+</code></pre>
+			</codesample>
+		</div>
+	</div>
+
+	<span class="string decrypted">
+		<span class="label">Client Handshake Finished</span>
+		<span class="bytes">
+ 14 00 00 20 0d b5 e0 6f 69 d7 34 36 d0 47 56 1a cd 8f 9f 60 a6 fe 93 e7 ec 6f 61 25 fa a1 59 8f
+ d2 81 70 ec
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Record Type</span>
+		<span class="bytes">
+ 16
+		</span>
+		<div class="explanation">
+			Each TLS 1.3 record disguised as TLS 1.2
+			application data has a final non-zero byte
+			which indicates its actual record type.
+			<ul>
+			<li><tt>16</tt> - type is 0x16 (handshake record)
+			</ul>
+		</div>
+	</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record client embedded">
+<div class="rec-label">Client Handshake Finished</div>
+<div class="rec-explanation">
+	To verify that the handshake was successful and not tampered
+	with, the client calculates verification data and encrypts
+	it with the client handshake key.
+	The verification data is built from a hash of all handshake
+	messages and verifies the integrity of the handshake process.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+ 14 00 00 20
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>14</tt> - handshake message type 0x14 (finished)
+			<li><tt>00 00 20</tt> - payload length of 0x20 (32) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Verify Data</span>
+		<span class="bytes">
+ 0d b5 e0 6f 69 d7 34 36 d0 47 56 1a cd 8f 9f 60 a6 fe 93 e7 ec 6f 61 25 fa a1 59 8f d2 81 70 ec
+		</span>
+		<div class="explanation">
+			The verify_data is built using the
+			client_handshake_traffic_secret from
+			the "Server Handshake Keys Calc" step and
+			a SHA256 hash of every handshake record
+			from Client Hello to Server Finished.
+<pre>
+finished_key = HKDF-Expand-Label(
+    key = client_handshake_traffic_secret,
+    label = "finished",
+    context = "",
+    len = 32)
+finished_hash = SHA256(Client Hello ... Server Finished)
+verify_data = HMAC-SHA256(
+	key = finished_key,
+	data = finished_hash)
+</pre>
+			We can use <a href="files/hkdf.sh">the HKDF
+			tool</a> to reproduce this this on the command line.
+			<codesample>
+<pre><code>$ cht_secret=66afa331b2e837d9ee285c12047b0a80a757f917ddbfa873e1abc579da297401
+$ fin_hash=cf0e93f4536391568f51962b988c48ee2cdcaa553fe809bba89bfe4fe36f5cf3
+$ fin_key=$(./hkdf expandlabel $cht_secret "finished" "" 32)
+$ echo $fin_hash | xxd -r -p \
+  | openssl dgst -sha256 -mac HMAC -macopt hexkey:$fin_key
+
+0db5e06f69d73436d047561acd8f9f60a6fe93e7ec6f6125faa1598fd28170ec
+</code></pre>
+			</codesample>
+		</div>
+	</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record client">
+<div class="rec-label">Client Data Wrapper</div>
+<div class="rec-explanation">
+	To reduce issues with middleware that blocks unrecognized
+	TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+	application data.
+	<br/><br/>
+	This disguise adds a single byte of overhead
+	(the wrapped record type).  This is more than made up for
+	by our cipher suite's lack of padding and EIV overhead.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+ 17 03 03 00 15
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<br/><br>
+			To reduce issues with middleware that
+			blocks unrecognized TLS
+			protocols, this record is disguised as TLS
+			1.2 application data.
+			<ul>
+			<li><tt>17</tt> - type is 0x17 (application data)
+			<li><tt>03 03</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>00 15</tt> - the length of the record payload is 0x15 (21) bytes
+			</ul>
+			All data following this header is the encrypted form of the actual record.
+		</div>
+	</span>
+
+	<span class="string encrypted">
+		<span class="label">Encrypted Data</span>
+		<span class="bytes">
+ 22 d8 65 5f 86
+		</span>
+		<div class="explanation">
+			This data is encrypted with the client application key.
+			<br/><br/>
+			See below for the decrypted data.
+		</div>
+	</span>
+
+	<span class="string encrypted">
+		<span class="label">Auth Tag</span>
+		<span class="bytes">
+ c5 91 3d 89 2d 7e c8 dd 89 bd 5b d6 99 05 57 35
+		</span>
+		<div class="explanation">
+			This is the AEAD authentication tag
+			that protects the integrity of the
+			encrypted data and its record header.
+		</div>
+	</span>
+
+	<div class="decryption">
+		<div class="label">Decryption</div>
+		<div class="explanation">
+			This data is encrypted using the client
+			application key and the client application IV that were
+			generated during the "Client Application Keys
+			Calc" step.  The IV will be modified
+			by XOR'ing it by the count of records that
+			have already been encrypted with this key,
+			which in thise case is 0.  The process also
+			takes as input the 5-byte record header
+			that this record begins with, as authenticated
+			data that must match for the decryption to
+			succeed.
+			<br/><br/>
+			Because the <tt>openssl</tt> command line
+			tool does not yet support the AEAD ciphers,
+			I've written command line tools to both
+			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			this data.
+			<codesample>
+<pre><code>### from the "Client Application Keys Calc" step
+$ key=2d78f5e75f8120d0a010e55553cdf540
+$ iv=2da36cce479d99a82597433e
+### from this record
+$ recdata=1703030015
+$ authtag=c5913d892d7ec8dd89bd5bd699055735
+$ recordnum=0
+### may need to add -I and -L flags for include and lib dirs
+$ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
+$ echo "22 d8 65 5f 86" \
+  | xxd -r -p > /tmp/msg3
+$ cat /tmp/msg3 \
+  | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
+  | hexdump -C
+
+00000000  70 69 6e 67 17                                    |ping.|
+</code></pre>
+			</codesample>
+		</div>
+	</div>
+
+	<span class="string decrypted">
+		<span class="label">Client Application Data</span>
+		<span class="bytes">
+ 70 69 6e 67
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Record Type</span>
+		<span class="bytes">
+ 17
+		</span>
+		<div class="explanation">
+			Each TLS 1.3 record disguised as TLS 1.2
+			application data has a final byte
+			which indicates its actual record type.
+			<ul>
+			<li><tt>17</tt> - type is 0x17 (application data)
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record client embedded">
+<div class="rec-label">Client Application Data</div>
+<div class="rec-explanation">
+	The client sends the data "ping".
+</div>
+<span class="record-data">
+	<span class="string decrypted">
+		<span class="label">Application Data</span>
+		<span class="bytes">
+ 70 69 6e 67
+		</span>
+		<div class="explanation">
+			The bytes "ping".
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+XXXXX TICKETS GO HERE
+
+<div class="rec-outer">
+<div class="record server">
+<div class="rec-label">Server Data Wrapper</div>
+<div class="rec-explanation">
+	To reduce issues with middleware that blocks unrecognized
+	TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+	application data.
+	<br/><br/>
+	This disguise adds a single byte of overhead
+	(the wrapped record type).  This is more than made up for
+	by our cipher suite's lack of padding and EIV overhead.
+</div>
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+ 17 03 03 00 15
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<br/><br>
+			To reduce issues with middleware that
+			blocks unrecognized TLS
+			protocols, this record is disguised as TLS
+			1.2 application data.
+			<ul>
+			<li><tt>17</tt> - type is 0x17 (application data)
+			<li><tt>03 03</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>00 15</tt> - the length of the record payload is 0x15 (21) bytes
+			</ul>
+			All data following this header is the encrypted form of the actual record.
+		</div>
+	</span>
+
+	<span class="string encrypted">
+		<span class="label">Encrypted Data</span>
+		<span class="bytes">
+ 0e e4 89 46 d6
+		</span>
+		<div class="explanation">
+			This data is encrypted with the server application key.
+			<br/><br/>
+			See below for the decrypted data.
+		</div>
+	</span>
+
+	<span class="string encrypted">
+		<span class="label">Auth Tag</span>
+		<span class="bytes">
+ b3 57 df f4 d1 c1 e6 b9 91 65 2e 18 c2 fd 4a a0
+		</span>
+		<div class="explanation">
+			This is the AEAD authentication tag
+			that protects the integrity of the
+			encrypted data and its record header.
+		</div>
+	</span>
+
+	<div class="decryption">
+		<div class="label">Decryption</div>
+		<div class="explanation">
+			This data is encrypted using the server
+			application key and the server application IV that were
+			generated during the "Server Application Keys
+			Calc" step.  The IV will be modified
+			by XOR'ing it by the count of records that
+			have already been encrypted with this key,
+			which in thise case is 1.  The process also
+			takes as input the 5-byte record header
+			that this record begins with, as authenticated
+			data that must match for the decryption to
+			succeed.
+			<br/><br/>
+			Because the <tt>openssl</tt> command line
+			tool does not yet support the AEAD ciphers,
+			I've written command line tools to both
+			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			this data.
+			<codesample>
+<pre><code>### from the "Server Application Keys Calc" step
+$ key=81c6697a47c4aa4a810f86f2c8b46f1d
+$ iv=46bf93d546b87cc9ca63dba3
+### from this record
+$ recdata=1703030015
+$ authtag=b357dff4d1c1e6b991652e18c2fd4aa0
+$ recordnum=1
+### may need to add -I and -L flags for include and lib dirs
+$ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
+$ echo "0e e4 89 46 d6" \
+  | xxd -r -p > /tmp/msg4
+$ cat /tmp/msg4 \
+  | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
+  | hexdump -C
+
+00000000  70 6f 6e 67 17                                    |pong.|
+</code></pre>
+			</codesample>
+		</div>
+	</div>
+
+	<span class="string decrypted">
+		<span class="label">Server Application Data</span>
+		<span class="bytes">
+ 70 6f 6e 67
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Record Type</span>
+		<span class="bytes">
+ 17
+		</span>
+		<div class="explanation">
+			Each TLS 1.3 record disguised as TLS 1.2
+			application data has a final byte
+			which indicates its actual record type.
+			<ul>
+			<li><tt>17</tt> - type is 0x17 (application data)
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+<div class="rec-outer">
+<div class="record server embedded">
+<div class="rec-label">Server Application Data</div>
+<div class="rec-explanation">
+	The server sends the data "pong".
+</div>
+<span class="record-data">
+	<span class="string decrypted">
+		<span class="label">Application Data</span>
+		<span class="bytes">
+ 70 6f 6e 67
+		</span>
+		<div class="explanation">
+			The bytes "pong".
+		</div>
+	</span>
+</span>
+</div>
+</div>
+
+	<div class="outerblock">
+	<p>The code for this project can be found
+	<a href="https://github.com/syncsynchalt/illustrated-tls">on GitHub</a>.</p>
+	</div>
+
+	<div class="outerblock">
+	<p>If you found this page useful or interesting let me know via Twitter
+	<a href="https://twitter.com/xargsnotbombs">@XargsNotBombs</a>.</p>
+	</div>
+
+</div>
+
+<div id="templates" style="display: none">
+	<div id="closeBtnTmpl">
+		<span class="close" onclick="ill.unselectAllStrings()">×</span>
+	</div>
+	<div id="showCodeTmpl">
+		<button class="show-code" onclick="ill.showCode(this, event)">Show Code</button>
+	</div>
+	<button id="annotateTmpl" class="annotate-toggle"
+		onclick="ill.toggleAnnotate(this.parentElement, event)">Annotations</button>
+</div>
+
+<a class="print-mode" href="#print" onclick="ill.printMode()">
+	[print]
+</a>
+</body>
+</html>

@@ -1,0 +1,391 @@
+/* remove focus rings for non-keyboard users */
+body:not(.user-is-tabbing) button:focus,
+body:not(.user-is-tabbing) input:focus,
+body:not(.user-is-tabbing) select:focus,
+body:not(.user-is-tabbing) textarea:focus {
+	outline: none;
+}
+
+body {
+	/* printmode */
+	position: relative;
+}
+
+.container {
+	/* printmode */
+	overflow: auto;
+}
+
+/* hide keys when there is no room for them */
+@media (max-width: 600px) {
+	.illustration {
+		display: none !important;
+	}
+	.print-mode {
+		display: none;
+	}
+}
+
+h1:after {
+	content: "\00a0❧";
+}
+h1:before {
+	content: "❧\00a0";
+}
+h1,
+h3 {
+	text-align: center;
+	padding: 10px;
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+pre {
+	margin: 1em 0;
+	overflow: scroll;
+	-ms-overflow-style: scrollbar;
+}
+
+pre code {
+	font-size: inherit;
+	word-break: normal;
+	display: block;
+	color: white;
+	background-color: black;
+	padding: 0.5em;
+	border-radius: 5px;
+	overflow: scroll;
+	-ms-overflow-style: scrollbar;
+}
+
+ol, ul, dl {
+  margin: 1rem 0;
+}
+
+tt.longboi {
+	word-break: break-all;
+}
+
+.ind1 {
+	padding-left: 1em;
+}
+.ind2 {
+	padding-left: 2em;
+}
+
+.outerblock {
+	max-width: 600px;
+	margin: 1em auto;
+}
+.outerblock p {
+	text-align: center;
+}
+
+.server {
+	background-color: #D0E8F5;
+}
+
+.client {
+	background-color: #D8EDCF;
+}
+
+/***** .record and .calculation *****/
+
+.embedmarker {
+	content: "->";
+	height: 100px;
+	width: 100px;
+	float: left;
+}
+
+.rec-outer {
+	margin: 0.8em auto;
+}
+
+.record, .calculation {
+	cursor: pointer;
+	max-width: 800px;
+	padding: 1em;
+	border-radius: 1em;
+	border: 2px solid transparent;
+}
+
+.record.embedded {
+	margin-left: 2em;
+}
+.record.embedded.selected {
+	margin-left: 0;
+}
+
+.illustrated .server.record .rec-label:before {
+	content: "⇇ ";
+}
+.illustrated .client.record .rec-label:before {
+	content: "⇉ ";
+}
+.illustrated .calculation .rec-label:before {
+	content: "÷ ";
+}
+
+.rec-label {
+	cursor: pointer;
+	font-size: 1.3em;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+
+	white-space: nowrap;
+	text-align: center;
+	width: 100%;
+	transition: all 0.3s;
+}
+
+.record.selected,
+.calculation.selected {
+	cursor: inherit;
+	box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 2px;
+}
+
+.record.selected .rec-label,
+.calculation.selected .rec-label {
+	padding: 0 0 10px 0;
+	width: 0;
+}
+.illustrated .record.selected .rec-label:after,
+.illustrated .calculation.selected .rec-label:after {
+	content: " ×";
+	font-weight: bold;
+	cursor: pointer;
+}
+
+.record .record-data {
+	font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
+	display: none;
+	position: relative;
+}
+
+.record.selected .record-data {
+	display: block;
+}
+
+.record:hover,
+.calculation:hover {
+	border: 2px solid #666;
+}
+.record.selected:hover,
+.calculation.selected:hover {
+	border: 2px solid transparent;
+}
+
+.rec-explanation {
+	display: none;
+	margin-bottom: 1em;
+}
+.record.selected .rec-explanation,
+.calculation.selected .rec-explanation {
+	display: block;
+}
+
+.record .illustration,
+.calculation .illustration {
+	margin: -40px 0 0 0;
+	display: none;
+	float: right;
+}
+.record.selected .illustration,
+.calculation.selected .illustration {
+	display: block;
+}
+
+.record > button.annotate-toggle {
+	display: none;
+}
+.record.selected > button.annotate-toggle {
+	display: block;
+}
+
+/***** .record-data *****/
+
+.client .record-data .string:hover {
+	color: teal;
+}
+.server .record-data .string:hover {
+	color: darkgreen;
+}
+
+.record-data .string {
+	position: relative;
+}
+
+.record-data .string .label {
+	display: none;
+	position: absolute;
+	background-color: #FAF7DC;
+	border-radius: 5px;
+	margin: 2px 0;
+	padding: 2px 7px;
+	line-height: 1.2;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	top: -28px;
+	box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 2px;
+}
+.record-data .string:hover > .label {
+	display: inline;
+}
+
+.record-data .string .label:after {
+	content: "";
+	position: absolute;
+	box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 2px;
+	-webkit-transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	-o-transform: rotate(45deg);
+	transform: rotate 45deg;
+	bottom: -3px;
+	left: 10px;
+	border-width: 3px;
+	border-style: solid;
+	border-color: transparent #FAF7DC #FAF7DC transparent;
+}
+
+.record.annotate .string > .explanation,
+.record.annotate .decryption > .explanation {
+	display: block;
+	font-size: 0.9em;
+	color: black;
+	margin: 1em 0;
+	padding: 1em;
+	background-color: #FAF7DC;
+	border: 2px solid #e0d998;
+	border-radius: 1em;
+	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+	box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 2px;
+}
+
+.record.annotate .string > .label {
+	display: none;
+}
+
+.record .string > .explanation,
+.record .decryption > .explanation {
+	display: none;
+}
+
+.record .decryption > .label:before {
+	content: "⬇ ";
+}
+.record .decryption > .label:after {
+	content: " ⬇";
+}
+
+.string.encrypted .bytes {
+	text-shadow: 0px 0px 1px pink;
+}
+
+.string.decrypted .bytes {
+	text-shadow: 0px 0px 1px #90EE90;
+}
+
+.record-data .decryption {
+	margin: 1em 0;
+}
+
+.record-data .decryption .label {
+	text-align: center;
+}
+
+/***** codesample *****/
+
+codesample {
+	display: block;
+	margin: 1em 0;
+}
+
+codesample pre {
+	margin: 0;
+	height: 0;
+}
+
+codesample button.show-code {
+	display: block;
+	clear: both;
+	box-shadow: inset 0px 1px 3px 0px #91b8b3;
+	background: linear-gradient(to bottom, #768d87 5%, #6c7c7c 100%);
+	background-color: #768d87;
+	border-radius:5px;
+	border: 1px solid #566963;
+	cursor: pointer;
+	color: #ffffff;
+	font-family: Arial;
+	font-size: 15px;
+	font-weight: bold;
+	padding: 11px 23px;
+	text-decoration: none;
+	text-shadow: 0px -1px 0px #2b665e;
+}
+
+codesample button.show-code:hover:hover {
+	background: linear-gradient(to bottom, #6c7c7c 5%, #768d87 100%);
+	background-color: #6c7c7c;
+}
+codesample button.show-code:active {
+	position: relative;
+	top: 1px;
+}
+codesample.show button.show-code {
+	display: none;
+}
+codesample.show pre {
+	height: auto;
+}
+
+/***** annotation toggle button *****/
+
+button.annotate-toggle {
+	margin-bottom: 1em;
+
+	display: inline-block;
+	outline: none;
+	cursor: pointer;
+	text-align: center;
+	text-decoration: none;
+	font: Arial, Helvetica, sans-serif;
+	font-size: 1em;
+	padding: .4em 1.7em .45em;
+	text-shadow: 0 1px 1px rgba(0,0,0,.4);
+	border-radius: .5em;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.3);
+
+	color: #fff;
+	border: solid 1px #da7c0c;
+	background: #f78d1d;
+	background: -webkit-gradient(linear, left top, left bottom, from(#faa51a), to(#f47a20));
+	background: -moz-linear-gradient(top,  #faa51a,  #f47a20);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#faa51a', endColorstr='#f47a20');
+}
+button.annotate-toggle:hover {
+	text-decoration: none;
+
+	background: #f47c20;
+	background: -webkit-gradient(linear, left top, left bottom, from(#f88e11), to(#f06015));
+	background: -moz-linear-gradient(top,  #f88e11,  #f06015);
+	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f88e11', endColorstr='#f06015');
+}
+button.annotate-toggle:active {
+	position: relative;
+	top: 1px;
+}
+
+.print-mode {
+	cursor: pointer;
+	position: absolute;
+	padding: 5px;
+	bottom: 0;
+	right: 0;
+}
