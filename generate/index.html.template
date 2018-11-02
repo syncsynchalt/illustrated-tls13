@@ -302,7 +302,7 @@ pub:
 		</span>
 		<div class="explanation">
 			The client has indicated that it supports
-			elliptic curve (EC) cryptography for xxx 1 curve.
+			elliptic curve (EC) cryptography for 1 curve type.
 			To make this extension more generic for
 			other cryptography types it now calls these
 			"supported groups" instead of "supported
@@ -822,10 +822,9 @@ $ ./curve25519-mult client-ephemeral-private.key \
 <div class="record server">
 <div class="rec-label">Server Change Cipher Spec</div>
 <div class="rec-explanation">
-	This record is no longer needed.  When the client requests
-	"middlebox compatibility mode" by providing a non-empty
-	Session ID this record is sent to help disguise the session
-	as a resumed TLS 1.2 session.
+	This record is no longer needed.  In "middlebox compatibility
+	mode" this record is sent to help disguise the encrypted
+	handshake as a resumed TLS 1.2 session.
 </div>
 %file ../captures/caps/serverccs
 <span class="record-data">
@@ -1195,7 +1194,6 @@ $ cat /tmp/msg1 \
 <div class="rec-outer">
 <div class="record server embedded">
 <div class="rec-label">Server Certificate Verify</div>
-<img class="illustration" src="images/key5.png" width="138" height="250"/>
 <div class="rec-explanation">
 	The server provides information that ties the public key
 	generated during Client Key Exchange Generation to the
@@ -1231,46 +1229,54 @@ $ cat /tmp/msg1 \
 			the public key provided in the server
 			certificate.  To prove that the server owns
 			the server certificate (giving the certificate
-			validity in this TLS session), it signs the
-			ephemeral public key with the certificate's
-			private key.  This signature can be validated
-			with the certificate's public key.
+			validity in this TLS session), it signs
+			data that includes the hash of all handshake
+			messages using the certificate's private
+			key.  This signature can be validated with
+			the certificate's public key.  See code
+			below for more details.
 			<ul>
 			<li><tt>08 04</tt> - reserved value for RSA-PSS-RSAE-SHA256 signature
 			<li><tt>%2 %3</tt> - length of signature (%xx2 or %dd2 bytes)
-XXX
-			<li><tt>%4 %5 %6 ... %-3 %-2 %-1</tt> - XXX the
-					computed signature for <tt>SHA256(client_hello_random
-					+ server_hello_random + curve_info + public_key)</tt>
+			<li><tt>%4 %5 %6 ... %-3 %-2 %-1</tt> - a signature over this handshake's hash
 			</ul>
-			We can compute the signature ourselves using
-			the <a href="files/server.key" download="server.key">server's private key</a>,
+			We can verify the signature ourselves using the
+			<a href="files/server.crt" download="server.crt">server's certificate</a>
 			at the command line:
 			<codesample>
-<pre><code>
-XXX
-### client random from Client Hello
-$ echo -en '\x00\x01\x02\x03\x04\x05\x06\x07'  > /tmp/compute
-$ echo -en '\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f' >> /tmp/compute
-$ echo -en '\x10\x11\x12\x13\x14\x15\x16\x17' >> /tmp/compute
-$ echo -en '\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f' >> /tmp/compute
-### server random from Server Hello
-$ echo -en '\x70\x71\x72\x73\x74\x75\x76\x77' >> /tmp/compute
-$ echo -en '\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f' >> /tmp/compute
-$ echo -en '\x80\x81\x82\x83\x84\x85\x86\x87' >> /tmp/compute
-$ echo -en '\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f' >> /tmp/compute
-### the curve info section from this message
-$ echo -en '\x03\x00\x1d' >> /tmp/compute
-### the public key sections from this msg
-$ echo -en '\x20\x9f\xd7\xad\x6d\xcf\xf4\x29' >> /tmp/compute
-$ echo -en '\x8d\xd3\xf9\x6d\x5b\x1b\x2a\xf9' >> /tmp/compute
-$ echo -en '\x10\xa0\x53\x5b\x14\x88\xd7\xf8' >> /tmp/compute
-$ echo -en '\xfa\xbb\x34\x9a\x98\x28\x80\xb6\x15' >> /tmp/compute
-$ openssl dgst -sign server.key -sha256 /tmp/compute | hexdump
+<pre><code>### build the data that was signed:
+### 1. add 64 space characters
+$ echo -n '                                ' > /tmp/tosign
+$ echo -n '                                ' >> /tmp/tosign
+### 2. add this fixed string
+$ echo -n 'TLS 1.3, server CertificateVerify' >> /tmp/tosign
+### 3. add a single null character
+$ echo -en '\0' >> /tmp/tosign
+### 4. add hash of handshake to this point
+$ handshake_hash=90fc4368777be2d54663d0c48f66c0ce7d9d2a117c62e58be100b00d760ae6b4
+$ echo $handshake_hash | xxd -r -p >> /tmp/tosign
 
-0000000 04 02 b6 61 f7 c1 91 ee 59 be 45 37 66 39 bd c3
-... snip ...
-00000f0 7d 87 dc 33 18 64 35 71 22 6c 4d d2 c2 ac 41 fb
+### copy the signature that we want to verify
+$ echo "2c f8 ec e7 24 28 04 93 4b 58 ef 48 79 4c 25 2b d3 4a d1 0a ed ff
+  f9 30 ca 05 a3 16 9a 59 17 66 8f 39 9d 43 fc db af 2b 1c 17 4d 52 d7 25
+  17 4d b9 c7 54 c7 9b 63 30 3b e7 2d e1 83 7f 68 2f 6a 94 d3 55 de 74 c3
+  d0 4d 6d 61 24 14 c9 b5 ec 28 57 61 27 1c 68 f5 ce 66 b7 c2 fb 65 36 19
+  98 26 fc 41 fe 61 23 fc 80 06 b4 25 fd 4b 03 a3 42 1e 91 fb 4b 63 f7 a3
+  14 e1 95 17 b7 f1 74 56 f5 66 67 b5 ba 81 d7 59 d3 5d 21 f0 ed 76 14 a8
+  98 99 97 9e 99 2f 37 ab d7 f2 25 0c 7d dd 45 3b f8 12 b6 fe 99 ff 18 aa
+  ac 86 80 78 55 32 d7 cd 27 fd ed 16 7f c8 9a bd 44 ec e7 8d 1a 69 ec 71
+  37 0f 0a 32 b0 b9 7a 6c 22 4e e9 d6 a5 eb 26 36 51 42 1d bd dd 53 91 c8
+  5b 3e 9b 66 42 35 79 7c 0c 31 82 0e 3e 67 5a a2 46 9a 98 28 7c 5e 4f cd
+  80 be d5 54 7a af 8a 80 b8 0c fc 11 db a1 b4 3a 4a c2" | xxd -r -p > /tmp/sig
+
+### extract the public key from the certificate
+$ openssl x509 -pubkey -noout -in server.crt > server.pub
+
+### verify the signature
+$ cat /tmp/tosign | openssl dgst -verify server.pub -sha256 \
+    -sigopt rsa_padding_mode:pss -sigopt rsa_pss_saltlen:-1 -signature /tmp/sig
+
+Verified OK
 </code></pre>
 			</codesample>
 		</div>
@@ -1461,10 +1467,9 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 <div class="record client">
 <div class="rec-label">Client Change Cipher Spec</div>
 <div class="rec-explanation">
-	This record is no longer needed.  When the client requests
-	"middlebox compatibility mode" by providing a non-empty
-	Session ID this record is sent to help disguise the session
-	as a resumed TLS 1.2 session.
+	This record is no longer needed.  In "middlebox compatibility
+	mode" this record is sent to help disguise the encrypted
+	handshake as a resumed TLS 1.2 session.
 </div>
 %file ../captures/caps/clientccs
 <span class="record-data">
@@ -1870,7 +1875,406 @@ $ cat /tmp/msg3 \
 %next 1
 %empty
 
-XXXXX TICKETS GO HERE
+<div class="rec-outer">
+<div class="record server">
+<div class="rec-label">Server Data Wrapper</div>
+<div class="rec-explanation">
+	To reduce issues with middleware that blocks unrecognized
+	TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+	application data.
+	<br/><br/>
+	This disguise adds a single byte of overhead
+	(the wrapped record type).
+</div>
+%file ../captures/caps/servertickets
+<span class="record-data">
+	<span class="string">
+		<span class="label">Record Header</span>
+		<span class="bytes">
+%next 5
+%bytes
+		</span>
+		<div class="explanation">
+			TLS sessions are broken into the sending
+			and receiving of "records", which are blocks
+			of data with a type, a protocol version,
+			and a length.
+			<br/><br>
+			To reduce issues with middleware that
+			blocks unrecognized TLS
+			protocols, this record is disguised as TLS
+			1.2 application data.
+			<ul>
+			<li><tt>%0</tt> - type is 0x17 (application data)
+			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			</ul>
+			All data following this header is the encrypted form of the actual record.
+		</div>
+	</span>
+
+	<span class="string encrypted">
+		<span class="label">Encrypted Data</span>
+		<span class="bytes">
+%next 365
+%bytes
+		</span>
+		<div class="explanation">
+			This data is encrypted with the server application key.
+			<br/><br/>
+			See below for the decrypted data.
+		</div>
+	</span>
+
+	<span class="string encrypted">
+		<span class="label">Auth Tag</span>
+		<span class="bytes">
+%next 16
+%bytes
+		</span>
+		<div class="explanation">
+			This is the AEAD authentication tag
+			that protects the integrity of the
+			encrypted data and its record header.
+		</div>
+	</span>
+%empty
+
+	<div class="decryption">
+		<div class="label">Decryption</div>
+		<div class="explanation">
+			This data is encrypted using the server
+			application key and the server application IV that were
+			generated during the "Server Application Keys
+			Calc" step.  The IV will be modified
+			by XOR'ing it by the count of records that
+			have already been encrypted with this key,
+			which in thise case is 0.  The process also
+			takes as input the 5-byte record header
+			that this record begins with, as authenticated
+			data that must match for the decryption to
+			succeed.
+			<br/><br/>
+			Because the <tt>openssl</tt> command line
+			tool does not yet support the AEAD ciphers,
+			I've written command line tools to both
+			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			this data.
+			<codesample>
+<pre><code>### from the "Server Application Keys Calc" step
+$ key=81c6697a47c4aa4a810f86f2c8b46f1d
+$ iv=46bf93d546b87cc9ca63dba3
+### from this record
+$ recdata=170303017d
+$ authtag=2dd47a03c910eb2ada60ce789e7c7fa5
+$ recordnum=0
+### may need to add -I and -L flags for include and lib dirs
+$ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
+$ echo "29 ff d3 00 7b 62 4a ee f4 0c e0 55 76 6f c4 c6
+  ... snip ... 
+  e9 3c da 2c 6e " | xxd -r -p > /tmp/msg5
+$ cat /tmp/msg5 \
+  | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
+  | hexdump -C
+
+00000000  04 00 00 b2 00 02 a3 00  04 03 02 01 01 00 00 a0
+... snip ...
+</code></pre>
+			</codesample>
+		</div>
+	</div>
+
+%file ../captures/caps/serverticketsplain
+	<span class="string decrypted">
+		<span class="label">Server New Session Ticket 1</span>
+		<span class="bytes">
+%next 182
+%bytes
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Server New Session Ticket 2</span>
+		<span class="bytes">
+%next 182
+%bytes
+		</span>
+		<div class="explanation">
+			This data will be represented in its own section below.
+		</div>
+	</span>
+
+	<span class="string decrypted">
+		<span class="label">Record Type</span>
+		<span class="bytes">
+%next 1
+%bytes
+		</span>
+		<div class="explanation">
+			Each TLS 1.3 record disguised as TLS 1.2
+			application data has a final byte
+			which indicates its actual record type.
+			<ul>
+			<li><tt>%0</tt> - type is 0x16 (handshake data)
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+%empty
+
+<div class="rec-outer">
+<div class="record server embedded">
+<div class="rec-label">Server New Session Ticket 1</div>
+<div class="rec-explanation">
+	The server provides a session ticket that the client can
+	use to start a new session later.  Successfully resuming a
+	connection in this way will skip most of the computation
+	and network delay in session startup.
+	<br/><br/>
+	Because each session ticket is meant to be single-use, and
+	because the server expects a browser to open multiple
+	connections, it makes a size vs. speed decision to provide
+	the client with two session tickets for each negotiated
+	session.  This is the first ticket.
+</div>
+%file ../captures/caps/serverticket1
+<span class="record-data">
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+%next 4
+%bytes
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>%0</tt> - handshake message type 0x04 (new session ticket)
+			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Ticket Lifetime</span>
+		<span class="bytes">
+%next 4
+%bytes
+		</span>
+		<div class="explanation">
+			The ticket lifetime of %xxxx0 (%dddd0) seconds, or 2 days.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Ticket Age Add</span>
+		<span class="bytes">
+%next 4
+%bytes
+		</span>
+		<div class="explanation">
+			When sending this ticket back to the server,
+			it must add this number of milliseconds to
+			the timestamp indicating when the ticket
+			was generated.  This prevents attackers
+			from correlating the resumed session with
+			the session that generated this ticket.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Ticket Nonce</span>
+		<span class="bytes">
+%next 2
+%bytes
+		</span>
+		<div class="explanation">
+			A per-ticket value that is unique to each
+			ticket generated during this session.
+			<ul>
+			<li><tt>%0</tt> - %x0 (%d0) bytes of nonce data follows
+			<li><tt>%1</tt> - nonce value of %d1
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Session Ticket</span>
+		<span class="bytes">
+%next 162
+%bytes
+		</span>
+		<div class="explanation">
+			This is the ticket that can be sent to the
+			server to resume a session.  The data inside
+			is probably meaningful to the server, and
+			may contain enough information for the
+			server to safely resume the connection
+			without storing any information on the
+			server (such as in memory).  This information
+			is not meaningful or understandable to the
+			client.
+
+			<ul>
+			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of ticket data follows
+			<li><tt>%2 %3 ... %-2 %-1</tt> - session ticket
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Ticket Extensions</span>
+		<span class="bytes">
+%next 6
+%bytes
+		</span>
+		<div class="explanation">
+			The server provides some ticket extensions.
+			Interestingly these are not actual extensions
+			but are random data created as part of the
+			GREASE scheme to prevent badly written
+			software from rejecting unrecognized values.
+			<ul>
+			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of extension data follows
+			<li><tt>%2 %3</tt> - the randomly generated extension type
+			<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the first extension
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+%empty
+
+<div class="rec-outer">
+<div class="record server embedded">
+<div class="rec-label">Server New Session Ticket 1</div>
+<div class="rec-explanation">
+	The server provides a session ticket that the client can
+	use to start a new session later.  Successfully resuming a
+	connection in this way will skip most of the computation
+	and network delay in session startup.
+	<br/><br/>
+	Because each session ticket is meant to be single-use, and
+	because the server expects a browser to open multiple
+	connections, it makes a size vs. speed decision to provide
+	the client with two session tickets for each negotiated
+	session.  This is the first ticket.
+</div>
+%file ../captures/caps/serverticket1
+<span class="record-data">
+	<span class="string">
+		<span class="label">Handshake Header</span>
+		<span class="bytes">
+%next 4
+%bytes
+		</span>
+		<div class="explanation">
+			Each handshake message starts with a type and a length.
+			<ul>
+			<li><tt>%0</tt> - handshake message type 0x04 (new session ticket)
+			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			</ul>
+			All data following this header is the payload for this message.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Ticket Lifetime</span>
+		<span class="bytes">
+%next 4
+%bytes
+		</span>
+		<div class="explanation">
+			The ticket lifetime of %xxxx0 (%dddd0) seconds, or 2 days.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Ticket Age Add</span>
+		<span class="bytes">
+%next 4
+%bytes
+		</span>
+		<div class="explanation">
+			When sending this ticket back to the server,
+			it must add this number of milliseconds to
+			the timestamp indicating when the ticket
+			was generated.  This prevents attackers
+			from correlating the resumed session with
+			the session that generated this ticket.
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Ticket Nonce</span>
+		<span class="bytes">
+%next 2
+%bytes
+		</span>
+		<div class="explanation">
+			A per-ticket value that is unique to each
+			ticket generated during this session.
+			<ul>
+			<li><tt>%0</tt> - %x0 (%d0) bytes of nonce data follows
+			<li><tt>%1</tt> - nonce value of %d1
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Session Ticket</span>
+		<span class="bytes">
+%next 162
+%bytes
+		</span>
+		<div class="explanation">
+			This is the ticket that can be sent to the
+			server to resume a session.  The data inside
+			is probably meaningful to the server, and
+			may contain enough information for the
+			server to safely resume the connection
+			without storing any information on the
+			server (such as in memory).  This information
+			is not meaningful or understandable to the
+			client.
+
+			<ul>
+			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of ticket data follows
+			<li><tt>%2 %3 ... %-2 %-1</tt> - session ticket
+			</ul>
+		</div>
+	</span>
+
+	<span class="string">
+		<span class="label">Ticket Extensions</span>
+		<span class="bytes">
+%next 6
+%bytes
+		</span>
+		<div class="explanation">
+			The server provides some ticket extensions.
+			Interestingly these are not actual extensions
+			but are random data created as part of the
+			GREASE scheme to prevent badly written
+			software from rejecting unrecognized values.
+			<ul>
+			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of extension data follows
+			<li><tt>%2 %3</tt> - the randomly generated extension type
+			<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the first extension
+			</ul>
+		</div>
+	</span>
+</span>
+</div>
+</div>
+%empty
 
 <div class="rec-outer">
 <div class="record server">
