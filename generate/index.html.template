@@ -297,12 +297,12 @@ pub:
 	<span class="string">
 		<span class="label">Extension - Supported Groups</span>
 		<span class="bytes">
-%next 8
+%next 12
 %bytes
 		</span>
 		<div class="explanation">
 			The client has indicated that it supports
-			elliptic curve (EC) cryptography for 1 curve type.
+			elliptic curve (EC) cryptography for three curve types.
 			To make this extension more generic for
 			other cryptography types it now calls these
 			"supported groups" instead of "supported
@@ -312,6 +312,8 @@ pub:
 				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
 				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the curves list
 				<li><tt>00 1d</tt> - assigned value for the curve "x25519"
+				<li><tt>00 17</tt> - assigned value for the curve "secp256r1"
+				<li><tt>00 18</tt> - assigned value for the curve "secp384r1"
 			</ul>
 		</div>
 	</span>
@@ -694,7 +696,7 @@ $ ./curve25519-mult server-ephemeral-private.key \
 	We then calculate the SHA256 hash of all handshake messages
 	to this point (ClientHello and ServerHello).  The hash does
 	not include the 5-byte "record" headers.  This "hello_hash"
-	is <tt class="longboi">fcf5f66de7199fb7b285bed426cc945d3635512a7a9b866c94975475956df7e2</tt>.
+	is <tt class="longboi">da75ce1139ac80dae4044da932350cf65c97ccc9e33f1e6f7d2d4b18b736ffd5</tt>.
 	<br/><br/>
 
 	We then feed the hash and the shared secret into a set of key derivation
@@ -746,7 +748,7 @@ server_handshake_iv = HKDF-Expand-Label(
 
 	I've created <a href="files/hkdf.sh">an HKDF tool</a> to perform these operations on the command line.
 	<codesample>
-<pre><code>$ hello_hash=fcf5f66de7199fb7b285bed426cc945d3635512a7a9b866c94975475956df7e2
+<pre><code>$ hello_hash=da75ce1139ac80dae4044da932350cf65c97ccc9e33f1e6f7d2d4b18b736ffd5
 $ shared_secret=df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624
 $ zero_key=0000000000000000000000000000000000000000000000000000000000000000
 $ early_secret=$(./hkdf extract 00 $zero_key)
@@ -765,12 +767,12 @@ $ server_handshake_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 	From this we get the following key data:
 	<ul>
 	<li>handshake secret: <tt class="longboi">fb9fc80689b3a5d02c33243bf69a1b1b20705588a794304a6e7120155edf149a</tt>
-	<li>client handshake traffic secret: <tt class="longboi">66afa331b2e837d9ee285c12047b0a80a757f917ddbfa873e1abc579da297401</tt>.
-	<li>server handshake traffic secret: <tt class="longboi">a56045661f3bfed8ff504c40d0c49a6cb82aebfa185eb7f52f2a915b5a292754</tt>.
-	<li>client handshake key: <tt class="longboi">bd75f8a10bf81727cba7b7930f2d2d08</tt>
-	<li>server handshake key: <tt class="longboi">b567abf4246f473edad4efd363c5c8ad</tt>
-	<li>client handshake IV: <tt class="longboi">80852b60fb8bf887aa6a22d1</tt>
-	<li>server handshake IV: <tt class="longboi">99dc72e32ed29ca25ffe44a5</tt>
+	<li>client handshake traffic secret: <tt class="longboi">ff0e5b965291c608c1e8cd267eefc0afcc5e98a2786373f0db47b04786d72aea</tt>.
+	<li>server handshake traffic secret: <tt class="longboi">a2067265e7f0652a923d5d72ab0467c46132eeb968b6a32d311c805868548814</tt>.
+	<li>client handshake key: <tt class="longboi">7154f314e6be7dc008df2c832baa1d39</tt>
+	<li>server handshake key: <tt class="longboi">844780a7acad9f980fa25c114e43402a</tt>
+	<li>client handshake IV: <tt class="longboi">71abc2cae4c699d47c600268</tt>
+	<li>server handshake IV: <tt class="longboi">4c042ddc120a38d1417fc815</tt>
 	</ul>
 </div>
 </div>
@@ -809,10 +811,10 @@ $ ./curve25519-mult client-ephemeral-private.key \
 	server in "Server Handshake Keys Calc", the rest of
 	the calculation is identical and the same values are found:
 	<ul>
-	<li>client handshake key: <tt class="longboi">bd75f8a10bf81727cba7b7930f2d2d08</tt>
-	<li>server handshake key: <tt class="longboi">b567abf4246f473edad4efd363c5c8ad</tt>
-	<li>client handshake IV: <tt class="longboi">80852b60fb8bf887aa6a22d1</tt>
-	<li>server handshake IV: <tt class="longboi">99dc72e32ed29ca25ffe44a5</tt>
+	<li>client handshake key: <tt class="longboi">7154f314e6be7dc008df2c832baa1d39</tt>
+	<li>server handshake key: <tt class="longboi">844780a7acad9f980fa25c114e43402a</tt>
+	<li>client handshake IV: <tt class="longboi">71abc2cae4c699d47c600268</tt>
+	<li>server handshake IV: <tt class="longboi">4c042ddc120a38d1417fc815</tt>
 	</ul>
 </div>
 </div>
@@ -867,9 +869,7 @@ $ ./curve25519-mult client-ephemeral-private.key \
 	session resume.
 	<br/><br/>
 	This TLS 1.2 wrapper only adds a single byte of overhead
-	(the wrapped record type).  This is more than made up for
-	by our cipher suite's lack of padding and EIV overhead.
-COPY THIS
+	(the wrapped record type).
 </div>
 %file ../captures/caps/serverenchandshake
 <span class="record-data">
@@ -942,18 +942,17 @@ COPY THIS
 			this data.
 			<codesample>
 <pre><code>### from the "Server Handshake Keys Calc" step
-$ key=b567abf4246f473edad4efd363c5c8ad
-$ iv=99dc72e32ed29ca25ffe44a5
+$ key=844780a7acad9f980fa25c114e43402a
+$ iv=4c042ddc120a38d1417fc815
 ### from this record
 $ recdata=1703030475
-$ authtag=effe69ce8df8af2dc93227b2a27dfdf2
+$ authtag=e08b0e455a350ae54d76349aa68c71ae
 $ recordnum=0
 ### may need to add -I and -L flags for include and lib dirs
 $ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
-$ echo "03 3b 36 7c 23 7e 67 28 56 ae 20 e1 e4 67 61 f6 e6 1d bd d3 89 29
+$ echo "da 1e c2 d7 bd a8 eb f7 3e dd 50 10 fb a8 08 9f d4 26 b0 ea 1e
   ... snip ...
-  a7 16 b4 e1 de 41 aa 85 06 b9 1e bc c1 09 8d d0 08 4f 45 97 87 b0
-  49 " | xxd -r -p > /tmp/msg1
+  ac 2d dd 1f 88 5d 42 ea 58 4c" | xxd -r -p > /tmp/msg1
 $ cat /tmp/msg1 \
   | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
   | hexdump -C
@@ -1253,21 +1252,22 @@ $ echo -n 'TLS 1.3, server CertificateVerify' >> /tmp/tosign
 ### 3. add a single null character
 $ echo -en '\0' >> /tmp/tosign
 ### 4. add hash of handshake to this point
-$ handshake_hash=90fc4368777be2d54663d0c48f66c0ce7d9d2a117c62e58be100b00d760ae6b4
+$ handshake_hash=3e66361ada42c7cb97f9a62b00cae1d8b584174c745f9a338cf9f7cdd51d15f8
 $ echo $handshake_hash | xxd -r -p >> /tmp/tosign
 
 ### copy the signature that we want to verify
-$ echo "2c f8 ec e7 24 28 04 93 4b 58 ef 48 79 4c 25 2b d3 4a d1 0a ed ff
-  f9 30 ca 05 a3 16 9a 59 17 66 8f 39 9d 43 fc db af 2b 1c 17 4d 52 d7 25
-  17 4d b9 c7 54 c7 9b 63 30 3b e7 2d e1 83 7f 68 2f 6a 94 d3 55 de 74 c3
-  d0 4d 6d 61 24 14 c9 b5 ec 28 57 61 27 1c 68 f5 ce 66 b7 c2 fb 65 36 19
-  98 26 fc 41 fe 61 23 fc 80 06 b4 25 fd 4b 03 a3 42 1e 91 fb 4b 63 f7 a3
-  14 e1 95 17 b7 f1 74 56 f5 66 67 b5 ba 81 d7 59 d3 5d 21 f0 ed 76 14 a8
-  98 99 97 9e 99 2f 37 ab d7 f2 25 0c 7d dd 45 3b f8 12 b6 fe 99 ff 18 aa
-  ac 86 80 78 55 32 d7 cd 27 fd ed 16 7f c8 9a bd 44 ec e7 8d 1a 69 ec 71
-  37 0f 0a 32 b0 b9 7a 6c 22 4e e9 d6 a5 eb 26 36 51 42 1d bd dd 53 91 c8
-  5b 3e 9b 66 42 35 79 7c 0c 31 82 0e 3e 67 5a a2 46 9a 98 28 7c 5e 4f cd
-  80 be d5 54 7a af 8a 80 b8 0c fc 11 db a1 b4 3a 4a c2" | xxd -r -p > /tmp/sig
+$ echo "17 fe b5 33 ca 6d 00 7d 00 58 25 79 68 42 4b bc 3a a6 90
+  9e 9d 49 55 75 76 a5 20 e0 4a 5e f0 5f 0e 86 d2 4f f4 3f 8e b8 61
+  ee f5 95 22 8d 70 32 aa 36 0f 71 4e 66 74 13 92 6e f4 f8 b5 80 3b
+  69 e3 55 19 e3 b2 3f 43 73 df ac 67 87 06 6d cb 47 56 b5 45 60 e0
+  88 6e 9b 96 2c 4a d2 8d ab 26 ba d1 ab c2 59 16 b0 9a f2 86 53 7f
+  68 4f 80 8a ef ee 73 04 6c b7 df 0a 84 fb b5 96 7a ca 13 1f 4b 1c
+  f3 89 79 94 03 a3 0c 02 d2 9c bd ad b7 25 12 db 9c ec 2e 5e 1d 00
+  e5 0c af cf 6f 21 09 1e bc 4f 25 3c 5e ab 01 a6 79 ba ea be ed b9
+  c9 61 8f 66 00 6b 82 44 d6 62 2a aa 56 88 7c cf c6 6a 0f 38 51 df
+  a1 3a 78 cf f7 99 1e 03 cb 2c 3a 0e d8 7d 73 67 36 2e b7 80 5b 00
+  b2 52 4f f2 98 a4 da 48 7c ac de af 8a 23 36 c5 63 1b 3e fa 93 5b
+  b4 11 e7 53 ca 13 b0 15 fe c7 e4 a7 30 f1 36 9f 9e" | xxd -r -p > /tmp/sig
 
 ### extract the public key from the certificate
 $ openssl x509 -pubkey -noout -in server.crt > server.pub
@@ -1339,8 +1339,8 @@ verify_data = HMAC-SHA256(
 			We can use <a href="files/hkdf.sh">the HKDF
 			tool</a> to reproduce this on the command line.
 			<codesample>
-<pre><code>$ sht_secret=a56045661f3bfed8ff504c40d0c49a6cb82aebfa185eb7f52f2a915b5a292754
-$ fin_hash=245258a185c1c133556fca79a53367212a93f513669e6bbbd39fde0e1fe171cf
+<pre><code>$ sht_secret=a2067265e7f0652a923d5d72ab0467c46132eeb968b6a32d311c805868548814
+$ fin_hash=0cd9871cd7a164dce9fbc7f96c0f2978417dfc0c728a3f2096a7de210991a865
 $ fin_key=$(./hkdf expandlabel $sht_secret "finished" "" 32)
 $ echo $fin_hash | xxd -r -p \
   | openssl dgst -sha256 -mac HMAC -macopt hexkey:$fin_key
@@ -1371,7 +1371,7 @@ a2b22c83f1b01637d57bfa853d61a27057fddeebf975ec0367b93682c80eda14
 	Server Certificate, Server Certificate Verify, Server
 	Finished).  The hash does not include any of the 5-byte
 	"record" headers.  This "handshake_hash" is
-	<tt class="longboi">cf0e93f4536391568f51962b988c48ee2cdcaa553fe809bba89bfe4fe36f5cf3</tt>.
+	<tt class="longboi">22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b</tt>.
 	<br/><br/>
 	We then feed the hash and the handshake secret into a set of key derivation
 	operations using the HKDF algorithm:
@@ -1419,7 +1419,7 @@ server_application_iv = HKDF-Expand-Label(
 
 	I've created <a href="files/hkdf.sh">an HKDF tool</a> to perform these operations on the command line.
 	<codesample>
-<pre><code>$ handshake_hash=cf0e93f4536391568f51962b988c48ee2cdcaa553fe809bba89bfe4fe36f5cf3
+<pre><code>$ handshake_hash=22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b
 $ handshake_secret=fb9fc80689b3a5d02c33243bf69a1b1b20705588a794304a6e7120155edf149a
 $ zero_key=0000000000000000000000000000000000000000000000000000000000000000
 $ empty_hash=$(openssl sha256 < /dev/null)
@@ -1436,10 +1436,10 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 
 	From this we get the following key data:
 	<ul>
-	<li>client application key: <tt class="longboi">2d78f5e75f8120d0a010e55553cdf540</tt>
-	<li>server application key: <tt class="longboi">81c6697a47c4aa4a810f86f2c8b46f1d</tt>
-	<li>client application IV: <tt class="longboi">2da36cce479d99a82597433e</tt>
-	<li>server application IV: <tt class="longboi">46bf93d546b87cc9ca63dba3</tt>
+	<li>client application key: <tt class="longboi">49134b95328f279f0183860589ac6707</tt>
+	<li>server application key: <tt class="longboi">0b6d22c8ff68097ea871c672073773bf</tt>
+	<li>client application IV: <tt class="longboi">bc4dd5f7b98acff85466261d</tt>
+	<li>server application IV: <tt class="longboi">1b13dd9f8d8f17091d34b349</tt>
 	</ul>
 </div>
 </div>
@@ -1454,10 +1454,10 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 	It performs the same calculation shown in "Server Application
 	Keys Calc" and finds the same values:
 	<ul>
-	<li>client application key: <tt class="longboi">2d78f5e75f8120d0a010e55553cdf540</tt>
-	<li>server application key: <tt class="longboi">81c6697a47c4aa4a810f86f2c8b46f1d</tt>
-	<li>client application IV: <tt class="longboi">2da36cce479d99a82597433e</tt>
-	<li>server application IV: <tt class="longboi">46bf93d546b87cc9ca63dba3</tt>
+	<li>client application key: <tt class="longboi">49134b95328f279f0183860589ac6707</tt>
+	<li>server application key: <tt class="longboi">0b6d22c8ff68097ea871c672073773bf</tt>
+	<li>client application IV: <tt class="longboi">bc4dd5f7b98acff85466261d</tt>
+	<li>server application IV: <tt class="longboi">1b13dd9f8d8f17091d34b349</tt>
 	</ul>
 </div>
 </div>
@@ -1587,24 +1587,23 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 			this data.
 			<codesample>
 <pre><code>### from the "Client Handshake Keys Calc" step
-$ key=bd75f8a10bf81727cba7b7930f2d2d08
-$ iv=80852b60fb8bf887aa6a22d1
+$ key=7154f314e6be7dc008df2c832baa1d39
+$ iv=71abc2cae4c699d47c600268
 ### from this record
 $ recdata=1703030035
-$ authtag=78cf1ffd510a33f9c33d31c0d99845ff
+$ authtag=5435d4eb22d0536c80c932e2f3c96083
 $ recordnum=0
 ### may need to add -I and -L flags for include and lib dirs
 $ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
-$ echo "a7 e5 84 4d bf 37 02 fc a9 87 7f 65 aa 7c 87 cf 7a dd a5
-  43 fc 06 47 64 29 03 52 7c 52 11 8e 64 b9 50 65 86 30" \
-  | xxd -r -p > /tmp/msg2
+$ echo "71 55 df f4 74 1b df c0 c4 3a 1d e0 b0 11 33 ac 19 74 ed c8 8e 70
+  91 c3 ff 1e 26 60 cd 71 92 83 ba 40 f7 c1 0b" | xxd -r -p > /tmp/msg2
 $ cat /tmp/msg2 \
   | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
   | hexdump -C
 
-00000000  14 00 00 20 0d b5 e0 6f  69 d7 34 36 d0 47 56 1a  |... ...oi.46.GV.|
-00000010  cd 8f 9f 60 a6 fe 93 e7  ec 6f 61 25 fa a1 59 8f  |...`.....oa%%..Y.|
-00000020  d2 81 70 ec 16                                    |..p..|
+00000000  14 00 00 20 97 60 17 a7  7a e4 7f 16 58 e2 8f 70  |... .`..z...X..p|
+00000010  85 fe 37 d1 49 d1 e9 c9  1f 56 e1 ae bb e0 c6 bb  |..7.I....V......|
+00000020  05 4b d9 2b 16                                    |.K.+.|
 </code></pre>
 			</codesample>
 		</div>
@@ -1694,8 +1693,8 @@ verify_data = HMAC-SHA256(
 			We can use <a href="files/hkdf.sh">the HKDF
 			tool</a> to reproduce this this on the command line.
 			<codesample>
-<pre><code>$ cht_secret=66afa331b2e837d9ee285c12047b0a80a757f917ddbfa873e1abc579da297401
-$ fin_hash=cf0e93f4536391568f51962b988c48ee2cdcaa553fe809bba89bfe4fe36f5cf3
+<pre><code>$ cht_secret=ff0e5b965291c608c1e8cd267eefc0afcc5e98a2786373f0db47b04786d72aea
+$ fin_hash=22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b
 $ fin_key=$(./hkdf expandlabel $cht_secret "finished" "" 32)
 $ echo $fin_hash | xxd -r -p \
   | openssl dgst -sha256 -mac HMAC -macopt hexkey:$fin_key
@@ -1799,15 +1798,15 @@ $ echo $fin_hash | xxd -r -p \
 			this data.
 			<codesample>
 <pre><code>### from the "Client Application Keys Calc" step
-$ key=2d78f5e75f8120d0a010e55553cdf540
-$ iv=2da36cce479d99a82597433e
+$ key=49134b95328f279f0183860589ac6707
+$ iv=bc4dd5f7b98acff85466261d
 ### from this record
 $ recdata=1703030015
-$ authtag=c5913d892d7ec8dd89bd5bd699055735
+$ authtag=b12f5f25a781957874742ab7fb305dd5
 $ recordnum=0
 ### may need to add -I and -L flags for include and lib dirs
 $ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
-$ echo "22 d8 65 5f 86" \
+$ echo "c7 40 61 53 5e" \
   | xxd -r -p > /tmp/msg3
 $ cat /tmp/msg3 \
   | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
@@ -1963,17 +1962,17 @@ $ cat /tmp/msg3 \
 			this data.
 			<codesample>
 <pre><code>### from the "Server Application Keys Calc" step
-$ key=81c6697a47c4aa4a810f86f2c8b46f1d
-$ iv=46bf93d546b87cc9ca63dba3
+$ key=0b6d22c8ff68097ea871c672073773bf
+$ iv=1b13dd9f8d8f17091d34b349
 ### from this record
 $ recdata=170303017d
-$ authtag=2dd47a03c910eb2ada60ce789e7c7fa5
+$ authtag=bfe0c1f688627643a049c3492eaf6f0f
 $ recordnum=0
 ### may need to add -I and -L flags for include and lib dirs
 $ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
-$ echo "29 ff d3 00 7b 62 4a ee f4 0c e0 55 76 6f c4 c6
+$ echo "c4 d4 b7 1b 6f 4c 2f 30 13 02 74 e7 b4 6e 40 89 68 de 07 98 f3 60
   ... snip ... 
-  e9 3c da 2c 6e " | xxd -r -p > /tmp/msg5
+  9a 00 5f 88 e0 a2 da" | xxd -r -p > /tmp/msg5
 $ cat /tmp/msg5 \
   | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
   | hexdump -C
@@ -2167,7 +2166,7 @@ $ cat /tmp/msg5 \
 	the client with two session tickets for each negotiated
 	session.  This is the first ticket.
 </div>
-%file ../captures/caps/serverticket1
+%file ../captures/caps/serverticket2
 <span class="record-data">
 	<span class="string">
 		<span class="label">Handshake Header</span>
@@ -2365,16 +2364,15 @@ $ cat /tmp/msg5 \
 			this data.
 			<codesample>
 <pre><code>### from the "Server Application Keys Calc" step
-$ key=81c6697a47c4aa4a810f86f2c8b46f1d
-$ iv=46bf93d546b87cc9ca63dba3
+$ key=0b6d22c8ff68097ea871c672073773bf
+$ iv=1b13dd9f8d8f17091d34b349
 ### from this record
 $ recdata=1703030015
-$ authtag=b357dff4d1c1e6b991652e18c2fd4aa0
+$ authtag=fa7fb16b663ecdfca3dbb81931a90ca7
 $ recordnum=1
 ### may need to add -I and -L flags for include and lib dirs
 $ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
-$ echo "0e e4 89 46 d6" \
-  | xxd -r -p > /tmp/msg4
+$ echo "370e5f168a" | xxd -r -p > /tmp/msg4
 $ cat /tmp/msg4 \
   | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
   | hexdump -C

@@ -43,8 +43,6 @@ void keylog_callback(const SSL *ssl, const char *line)
 
 void configure_context(SSL_CTX *ctx)
 {
-	if (!SSL_CTX_set1_curves_list(ctx, "X25519"))
-		die("Unable to set ECDH curve");
 	SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, NULL);
 	SSL_CTX_set_min_proto_version(ctx, TLS1_3_VERSION);
 	SSL_CTX_set_keylog_callback(ctx, keylog_callback);
