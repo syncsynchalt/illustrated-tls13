@@ -39,6 +39,10 @@ button {
 	border: 2px solid black !important;
 }
 
+.record.annotate .string > .explanation:before {
+	display: none;
+}
+
 pre code {
 	border-radius: 0 !important;
 	border: 2px solid black !important;

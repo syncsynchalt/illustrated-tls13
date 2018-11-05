@@ -221,6 +221,9 @@ tt.longboi {
 .server .record-data .string:hover {
 	color: darkgreen;
 }
+.record.annotate .record-data .string:hover {
+	color: inherit;
+}
 
 .record-data .string {
 	position: relative;
@@ -264,6 +267,7 @@ tt.longboi {
 
 .record.annotate .string > .explanation,
 .record.annotate .decryption > .explanation {
+	position: relative;
 	display: block;
 	font-size: 0.9em;
 	color: black;
@@ -274,6 +278,22 @@ tt.longboi {
 	border-radius: 1em;
 	font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 	box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 2px;
+}
+
+.record.annotate .string > .explanation:before {
+	content: " ";
+	position: absolute;
+	padding: 5px;
+	-webkit-transform: rotate(45deg);
+	-moz-transform: rotate(45deg);
+	-ms-transform: rotate(45deg);
+	-o-transform: rotate(45deg);
+	transform: rotate 45deg;
+	top: -7px;
+	left: 20px;
+	border: 2px solid;
+	background-color: #FAF7DC;
+	border-color: #e0d998 transparent transparent #e0d998;
 }
 
 .record.annotate .string > .label {
