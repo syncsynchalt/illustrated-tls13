@@ -678,7 +678,7 @@ $ ./curve25519-mult server-ephemeral-private.key \
 	of the handshake process and to protect against known and
 	possible attacks:
 
-	<process>
+	<processblock>
 <pre>early_secret = HKDF-Extract(
     salt=00,
     key=00...)
@@ -722,7 +722,7 @@ server_handshake_iv = HKDF-Expand-Label(
     context = "",
     len = 12)
 </pre>
-	</process>
+	</processblock>
 
 	This has introduced two new cryptographic methods:
 	<ul>
@@ -1390,7 +1390,7 @@ Verified OK
 			from Client Hello to Server Certificate
 			Verify.
 
-			<process>
+			<processblock class="notrunc">
 <pre>finished_key = HKDF-Expand-Label(
     key = server_handshake_traffic_secret,
     label = "finished",
@@ -1399,9 +1399,9 @@ Verified OK
 finished_hash = SHA256(Client Hello ... Server Cert Verify)
 verify_data = HMAC-SHA256(
 	key = finished_key,
-	data = finished_hash)
+	msg = finished_hash)
 </pre>
-			</process>
+			</processblock>
 
 			We can use <a href="files/hkdf.sh">the HKDF
 			tool</a> to reproduce this on the command line.
@@ -1445,7 +1445,7 @@ ea6ee176dccc4af1859e9e4e93f797eac9a78ce439301e35275ad43f3cddbde3
 	of the handshake process and to protect against known and
 	possible attacks:
 
-	<process>
+	<processblock>
 <pre>empty_hash = SHA256("")
 derived_secret = HKDF-Expand-Label(
     key = handshake_secret,
@@ -1486,7 +1486,7 @@ server_application_iv = HKDF-Expand-Label(
     context = "",
     len = 12)
 </pre>
-	</process>
+	</processblock>
 
 	I've created <a href="files/hkdf.sh">an HKDF tool</a> to perform these operations on the command line.
 	<codesample>
@@ -1734,7 +1734,7 @@ $ cat /tmp/msg2 \
 			a SHA256 hash of every handshake record
 			from Client Hello to Server Finished.
 
-			<process>
+			<processblock class="notrunc">
 <pre>finished_key = HKDF-Expand-Label(
     key = client_handshake_traffic_secret,
     label = "finished",
@@ -1743,9 +1743,9 @@ $ cat /tmp/msg2 \
 finished_hash = SHA256(Client Hello ... Server Finished)
 verify_data = HMAC-SHA256(
 	key = finished_key,
-	data = finished_hash)
+	msg = finished_hash)
 </pre>
-			</process>
+			</processblock>
 
 			We can use <a href="files/hkdf.sh">the HKDF
 			tool</a> to reproduce this this on the command line.

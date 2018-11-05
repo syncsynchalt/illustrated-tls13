@@ -34,20 +34,20 @@
 		} else {
 			ill.closeAllCode();
 		}
-		if (event) { event.stopPropagation(); }
+		ill.cancel(event);
 		ill.ensureElementInView(element);
 	};
 
 	ill.selectRecord = function(element, event) {
 		ill.unselectAllRecords();
 		element.classList.add("selected");
-		if (event) { event.stopPropagation(); }
+		ill.cancel(event);
 		ill.ensureElementInView(element);
 	};
 
 	ill.showCode = function(element, event) {
 		element.parentNode.classList.add("show");
-		if (event) { event.stopPropagation(); }
+		ill.cancel(event);
 	};
 
 	ill.closeAllCode = function() {
@@ -108,6 +108,9 @@
 			el.classList.add("selected");
 			el.classList.add("annotate");
 		});
+		[].forEach.call(document.querySelectorAll("processblock"), function(el){
+			el.classList.add("notrunc");
+		});
 		[].forEach.call(document.querySelectorAll("codesample"), function(el){
 			el.classList.add("show");
 		});
@@ -130,6 +133,12 @@
 		[].forEach.call(document.querySelectorAll(".rec-label"), function(el) {
 			el.onclick = function(event) {
 				ill.toggleRecord(el.parentNode, event);
+			};
+		});
+		[].forEach.call(document.querySelectorAll("processblock"), function(el) {
+			el.onclick = function(event) {
+				el.classList.add("clicked");
+				ill.cancel(event);
 			};
 		});
 		[].forEach.call(document.querySelectorAll(".record"), function(el) {

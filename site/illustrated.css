@@ -328,17 +328,51 @@ tt.longboi {
 	text-align: center;
 }
 
-/***** process block *****/
+/***** processblock *****/
 
-process {
+processblock {
 	display: block;
+	position: relative;
 	margin: 1em;
 	padding-left: 1em;
-	font-size: 0.8em;
+	font-size: 0.9em;
+	max-height: 150px;
+	overflow: hidden;
+	transition: all 0.3s;
+	cursor-style: pointer;
 }
 
-process pre {
+processblock:before {
+	content: " ";
+	width: 100%;
+	height: 100%;
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+}
+.server processblock:before {
+	background: linear-gradient(transparent 100px, #D0E8F5);
+}
+.client processblock:before {
+	background: linear-gradient(transparent 100px, #D8EDCF);
+}
+.explanation processblock:before {
+	background: linear-gradient(transparent 100px, #FAF7DC);
+}
+
+processblock pre {
 	margin: 0;
+}
+
+processblock.clicked,
+processblock.notrunc {
+	max-height: 99999px;
+	cursor-style: auto;
+}
+processblock.clicked:before,
+processblock.notrunc:before {
+	background: none;
 }
 
 /***** codesample *****/
