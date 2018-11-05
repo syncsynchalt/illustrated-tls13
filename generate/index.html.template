@@ -20,9 +20,9 @@
 	<h3>Every byte of a TLS 1.3 connection explained and reproduced.</h3>
 
 	<div class="outerblock">
-	<p>In this demonstration a client has connected to a server,
-	negotiated a TLS 1.3 session, sent "ping", received "pong",
-	and then terminated the session. Click below to begin
+	<p>In this demonstration a client connects to a server,
+	negotiates a TLS 1.3 session, sends "ping", receives "pong",
+	and then terminates the session. Click below to begin
 	exploring.</p>
 	</div>
 
@@ -36,10 +36,10 @@
 	by which two parties can agree on the same number without
 	an eavesdropper being able to tell what that number is.
 	<br/><br/>
-	It will do this via the elliptical curve method, using the x25519 curve.
+	It will do this via an elliptical curve method, using the x25519 curve.
 	<br/><br/>
 	The private key is chosen by selecting an integer between
-	1 and 2<sup>256</sup>-1.  It does this by generating 32
+	0 and 2<sup>256</sup>-1.  It does this by generating 32
 	bytes (256 bits) of random data.  The
 	<a href="files/client-ephemeral-private.key" download="client-ephemeral-private.key">private key</a>
 	selected is:
@@ -82,7 +82,7 @@ pub:
 	<ul>
 	<li>client random data (used later in the handshake)
 	<li>a list of cipher suites that the client supports
-	<li>a list of public keys that the server might find suitable for key negotiation
+	<li>a list of public keys that the server might find suitable for key exchange
 	<li>protocol versions that the client can support
 	</ul>
 </div>
@@ -102,13 +102,12 @@ pub:
 			<ul>
 			<li><tt>%0</tt> - type is 0x16 (handshake record)
 			<li><tt>%1 %2</tt> - protocol version is 3.1 (also known as TLS 1.0)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of handshake message follows
 			</ul>
-			Interestingly the version is 3.1 (TLS 1.0)
-			instead of 3.4 (TLS 1.3).  This is done for
-			compatibility with earlier implementations.
-			<br/><br/>
-			All data following this header is the payload for this record.
+			Interestingly the version in this record
+			is 3.1 (TLS 1.0) instead of 3.4 (TLS 1.3).
+			This is done for interoperability with earlier
+			implementations.
 		</div>
 	</span>
 
@@ -122,9 +121,8 @@ pub:
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x01 (client hello)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of client hello data follows
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
@@ -136,10 +134,10 @@ pub:
 		</span>
 		<div class="explanation">
 			A protocol version of 3.3 (meaning TLS 1.2)
-			is given.  Because middleware has been
-			created and widely deployed that does not
-			understand or allow protocol versions that
-			it does not recognize, the TLS 1.3 session
+			is given.  Because middleboxes have been
+			created and widely deployed that do not
+			allow protocol versions that
+			they do not recognize, the TLS 1.3 session
 			must be disguised as a TLS 1.2 session.
 			This field is no
 			longer used for version negotiation and
@@ -149,8 +147,9 @@ pub:
 			<br/><br/>
 			The particular version number (3.3 representing
 			version 1.2) is due to TLS 1.0 being a minor
-			revision of the SSL 3.0 protocol, which was
-			therefore assigned version 3.1.
+			revision of the SSL 3.0 protocol.  Therefore
+			TLS 1.0 is numeric version 3.1, TLS 1.1 is version
+			3.2, and so on.
 		</div>
 	</span>
 
@@ -162,7 +161,7 @@ pub:
 		</span>
 		<div class="explanation">
 			The client provides 32 bytes of random data.
-			In this example we've made the random data predictable to make it easier to recognize.
+			In this example we've made the random data a predictable string.
 		</div>
 	</span>
 
@@ -178,12 +177,12 @@ pub:
 			session, which allows the server and client
 			to skip the time and cost of negotiating new keys.
 			<br/><br/>
-			In TLS 1.3 this is done via the more flexible
+			In TLS 1.3 this "session resume" is done via the more flexible
 			PSK (pre-shared keys) mechanism, so this
 			field is no longer needed for that purpose.
 			Instead a non-empty value in this field is
 			used to trigger "middlebox compatibility
-			mode" which allows TLS 1.3 sessions to be
+			mode" which helps TLS 1.3 sessions to be
 			disguised as resumed TLS 1.2 sessions.  The
 			client has generated random data to populate
 			this field.
@@ -278,8 +277,8 @@ pub:
 			<br/><br/>
 			Without this extension a HTTPS server would
 			not be able to provide service for multiple
-			hostnames on a single IP address (virtual
-			hosts) because it couldn't know which
+			hostnames (virtual hosts) on a single IP address
+			because it couldn't know which
 			hostname's certificate to send until
 			after the TLS session was negotiated and the
 			HTTP request was made.
@@ -307,6 +306,9 @@ pub:
 			other cryptography types it now calls these
 			"supported groups" instead of "supported
 			curves".
+			<br/><br/>
+			This list is presented in descending order
+			of the client's preference.
 			<ul>
 				<li><tt>00 0a</tt> - assigned value for extension "supported groups"
 				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
@@ -329,8 +331,7 @@ pub:
 			algorithms the client supports.  This can
 			influence the certificate that the server
 			presents to the client, as well as the
-			signature that is used to tie the ephemeral
-			keys to the certificate's private key in
+			signature that is sent by the server in
 			the CertificateVerify record.
 			<br/><br/>
 			This list is presented in descending order
@@ -366,16 +367,13 @@ pub:
 			and ServerHello messages to be encrypted,
 			unlike previous protocol versions where the
 			handshake was sent in the clear.
-			<br/><br/>
-			This list is presented in descending order
-			of the client's preference.
 			<ul>
 				<li><tt>00 33</tt> - assigned value for extension "Key Share"
 				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
 				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of key share data follows
 				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
 				<li><tt>%8 %9</tt> - %xx8 (%dd8) bytes of public key follows
-				<li><tt>%10 %11 ... %-2 %-1</tt></l> public key
+				<li><tt>%10 %11 ... %-2 %-1</tt></l> - public key from the step "Client Key Exchange Generation"
 			</ul>
 		</div>
 	</span>
@@ -432,10 +430,10 @@ pub:
 	by which two parties can agree on the same number without
 	an eavesdropper being able to tell what that number is.
 	<br/><br/>
-	It will do this via the elliptical curve method, using the x25519 curve.
+	It will do this via an elliptical curve method, using the x25519 curve.
 	<br/><br/>
 	The private key is chosen by selecting an integer between
-	1 and 2<sup>256</sup>-1.  It does this by generating 32
+	0 and 2<sup>256</sup>-1.  It does this by generating 32
 	bytes (256 bits) of random data.  The
 	<a href="files/server-ephemeral-private.key" download="server-ephemeral-private.key">private key</a>
 	selected is:
@@ -478,7 +476,7 @@ pub:
 	<ul>
 	<li>server random data (used later in the handshake)
 	<li>a selected cipher suite
-	<li>a public key for key negotiation
+	<li>a public key for key exchange
 	<li>the negotiated protocol version
 	</ul>
 </div>
@@ -498,9 +496,8 @@ pub:
 			<ul>
 			<li><tt>%0</tt> - type is 0x16 (handshake record)
 			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of handshake message follows
 			</ul>
-			All data following this header is the payload for this record.
 		</div>
 	</span>
 
@@ -514,9 +511,8 @@ pub:
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>02</tt> - handshake message type 0x02 (server hello)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of server hello data follows
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
@@ -528,21 +524,22 @@ pub:
 		</span>
 		<div class="explanation">
 			A protocol version of 3.3 (meaning TLS 1.2)
-			is given.  Because middleware has been
-			created and widely deployed that does not
-			understand or allow protocol versions that
-			it does not recognize, the TLS 1.3 session
+			is given.  Because middleboxes have been
+			created and widely deployed that do not
+			allow protocol versions that
+			they do not recognize, the TLS 1.3 session
 			must be disguised as a TLS 1.2 session.
 			This field is no
-			longer usable for version negotiation and
+			longer used for version negotiation and
 			is hardcoded to the 1.2 version.  Instead
 			version negotiation is performed using the
 			"Supported Versions" extension below.
 			<br/><br/>
 			The particular version number (3.3 representing
 			version 1.2) is due to TLS 1.0 being a minor
-			revision of the SSL 3.0 protocol, which was
-			therefore assigned version 3.1.
+			revision of the SSL 3.0 protocol.  Therefore
+			TLS 1.0 is numeric version 3.1, TLS 1.1 is version
+			3.2, and so on.
 		</div>
 	</span>
 
@@ -554,7 +551,7 @@ pub:
 		</span>
 		<div class="explanation">
 			The server provides 32 bytes of random data.
-			In this example we've made the random data predictable to make it easier to recognize.
+			In this example we've made the random data a predictable string.
 		</div>
 	</span>
 
@@ -613,7 +610,7 @@ pub:
 			forbidden from replying with an extension
 			that the client did not send in its hello
 			message, the server knows that the client
-			will support all extensions listed.
+			will understand and support all extensions listed.
 			<ul>
 			<li><tt>%0 %1</tt> - the extensions will take %xx0 (%dd0) bytes of data
 			</ul>
@@ -639,6 +636,7 @@ pub:
 				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
 				<li><tt>%8 %9</tt> - %xx8 (%dd8) bytes of public key follows
 				<li><tt>%10 %11 ... %-2 %-1</tt></l> public key
+				<li><tt>%10 %11 ... %-2 %-1</tt></l> - public key from the step "Server Key Exchange Generation"
 			</ul>
 		</div>
 	</span>
@@ -676,10 +674,11 @@ pub:
 	<li><a href="server-ephemeral-private.key">server private key</a> (from Server Key Exchange Generation)
 	<li>SHA256 hash of ClientHello and ServerHello</li>
 	</ul>
-	The server multiplies the client's public key with the
-	server's private key using the curve25519() algorithm.  The
-	32-byte result is called the shared secret, and is found
-	to be:
+	First, the server finds the shared secret, which is the
+	result of the key exchange that allows the client and server
+	to agree on a number.  The server multiplies the client's
+	public key with the server's private key using the curve25519()
+	algorithm.  The 32-byte result is found to be:
 	<pre class="ind2"><tt class="longboi">df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624</tt></pre>
 
 	I've provided <a href="files/curve25519-mult.c">a tool</a> to perform this calculation:
@@ -699,8 +698,10 @@ $ ./curve25519-mult server-ephemeral-private.key \
 	is <tt class="longboi">da75ce1139ac80dae4044da932350cf65c97ccc9e33f1e6f7d2d4b18b736ffd5</tt>.
 	<br/><br/>
 
-	We then feed the hash and the shared secret into a set of key derivation
-	operations using the HKDF algorithm:
+	We then feed the hash and the shared secret into a set of
+	key derivation operations, designed to ensure the integrity
+	of the handshake process and to protect against known and
+	possible attacks:
 
 <pre>early_secret = HKDF-Extract(
     salt=00,
@@ -761,6 +762,15 @@ $ client_handshake_key=$(./hkdf expandlabel $csecret "key" "" 16)
 $ server_handshake_key=$(./hkdf expandlabel $ssecret "key" "" 16)
 $ client_handshake_iv=$(./hkdf expandlabel $csecret "iv" "" 12)
 $ server_handshake_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
+$ echo ckey: $client_handshake_key
+$ echo skey: $server_handshake_key
+$ echo civ: $client_handshake_iv
+$ echo siv: $server_handshake_iv
+
+ckey: 7154f314e6be7dc008df2c832baa1d39
+skey: 844780a7acad9f980fa25c114e43402a
+civ: 71abc2cae4c699d47c600268
+siv: 4c042ddc120a38d1417fc815
 </code></pre>
 	</codesample>
 
@@ -791,10 +801,11 @@ $ server_handshake_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 	<li><a href="client-ephemeral-private.key">client private key</a> (from Client Key Exchange Generation)
 	<li>SHA256 hash of ClientHello and ServerHello</li>
 	</ul>
-	The client multiplies the server's public key with the
-	client's private key using the curve25519() algorithm.  The
-	32-byte result is called the shared secret, and is found
-	to be:
+	First, the client finds the shared secret, which is the
+	result of the key exchange that allows the client and server
+	to agree on a number.  The client multiplies the server's
+	public key with the client's private key using the curve25519()
+	algorithm.  The 32-byte result is found to be:
 	<pre class="ind2"><tt class="longboi">df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624</tt></pre>
 
 	I've provided <a href="files/curve25519-mult.c">a tool</a> to perform this calculation:
@@ -825,8 +836,8 @@ $ ./curve25519-mult client-ephemeral-private.key \
 <div class="rec-label">Server Change Cipher Spec</div>
 <div class="rec-explanation">
 	This record is no longer needed.  In "middlebox compatibility
-	mode" this record is sent to help disguise the encrypted
-	handshake as a resumed TLS 1.2 session.
+	mode" this record is sent to help disguise the session as
+	a TLS 1.2 session.
 </div>
 %file ../captures/caps/serverccs
 <span class="record-data">
@@ -856,20 +867,19 @@ $ ./curve25519-mult client-ephemeral-private.key \
 
 <div class="rec-outer">
 <div class="record server">
-<div class="rec-label">Server Handshake Wrapper</div>
-<img class="illustration" src="images/key2.png" width="124" height="250"/>
+<div class="rec-label">Wrapper</div>
+<img class="illustration" src="images/key5.png" width="124" height="250"/>
 <div class="rec-explanation">
 	The connection (including the handshake) is encrypted from
 	this point on.  The encryption of handshake data is new in
 	TLS 1.3.
 	<br/><br/>
-	To reduce issues with middleware
-	that blocks unrecognized TLS protocols, the encrypted handshake is
-	disguised as a TLS 1.2 session that has performed a successful
-	session resume.
+	To reduce issues with middleboxes that block unrecognized
+	TLS protocols, the encrypted handshake is disguised as a
+	TLS 1.2 session that has performed a successful session
+	resume.
 	<br/><br/>
-	This TLS 1.2 wrapper only adds a single byte of overhead
-	(the wrapped record type).
+	The wrapped records are discussed in their own sections below this one.
 </div>
 %file ../captures/caps/serverenchandshake
 <span class="record-data">
@@ -880,16 +890,14 @@ $ ./curve25519-mult client-ephemeral-private.key \
 %bytes
 		</span>
 		<div class="explanation">
-			TLS sessions are broken into the sending
-			and receiving of "records", which are blocks
-			of data with a type, a protocol version,
-			and a length.
+			The TLS 1.3 records are encrypted into a
+			TLS 1.2 record "wrapper" that looks like
+			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
 			</ul>
-			All data following this header is the encrypted payload of this record.
 		</div>
 	</span>
 
@@ -901,11 +909,9 @@ $ ./curve25519-mult client-ephemeral-private.key \
 		</span>
 		<div class="explanation">
 			This data is encrypted with the server handshake key.
-			<br/><br/>
-			The decrypted data will be shown later in the record.
 		</div>
 	</span>
-	<span class="string encrypted">
+	<span class="string">
 		<span class="label">Auth Tag</span>
 		<span class="bytes">
 %next 16
@@ -914,7 +920,7 @@ $ ./curve25519-mult client-ephemeral-private.key \
 		<div class="explanation">
 			This is the AEAD authentication tag
 			that protects the integrity of the
-			encrypted data and its record header.
+			encrypted data and the record header.
 		</div>
 	</span>
 %empty
@@ -935,7 +941,7 @@ $ ./curve25519-mult client-ephemeral-private.key \
 			succeed.
 			<br/><br/>
 			Because the <tt>openssl</tt> command line
-			tool does not yet support the AEAD ciphers,
+			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
 			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
 			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
@@ -974,7 +980,7 @@ $ cat /tmp/msg1 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This handshake message is represented in its own section below.
 		</div>
 	</span>
 
@@ -985,7 +991,7 @@ $ cat /tmp/msg1 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This handshake message is represented in its own section below.
 		</div>
 	</span>
 
@@ -996,7 +1002,7 @@ $ cat /tmp/msg1 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This handshake message is represented in its own section below.
 		</div>
 	</span>
 
@@ -1007,7 +1013,7 @@ $ cat /tmp/msg1 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This handshake message is represented in its own section below.
 		</div>
 	</span>
 
@@ -1037,7 +1043,7 @@ $ cat /tmp/msg1 \
 <div class="rec-explanation">
 	Any extensions that aren't needed for negotiating encryption
 	keys should be listed here so they can be hidden from
-	eavesdroppers.
+	eavesdroppers and middleboxes.
 </div>
 %file ../captures/caps/serverencryptedextensions
 <span class="record-data">
@@ -1051,9 +1057,8 @@ $ cat /tmp/msg1 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x08 (encrypted extensions)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake message data follows
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
@@ -1098,10 +1103,9 @@ $ cat /tmp/msg1 \
 		<div class="explanation">
 			Each handshake message starts with a type and a length.
 			<ul>
-			<li><tt>0b</tt> - handshake message type 0x0B (certificate)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%0</tt> - handshake message type 0x0B (certificate)
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of certificate payload follow
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
@@ -1195,7 +1199,7 @@ $ cat /tmp/msg1 \
 <div class="rec-label">Server Certificate Verify</div>
 <div class="rec-explanation">
 	The server provides information that ties the public key
-	generated during Client Key Exchange Generation to the
+	generated during Server Key Exchange Generation to the
 	ownership of the certificate's private key.
 </div>
 %file ../captures/caps/servercertverify
@@ -1209,10 +1213,9 @@ $ cat /tmp/msg1 \
 		<div class="explanation">
 			Each handshake message starts with a type and a length.
 			<ul>
-			<li><tt>0f</tt> - handshake message type 0x0f (certificate verify)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%0</tt> - handshake message type 0x0f (certificate verify)
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake message data follows
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
@@ -1224,19 +1227,24 @@ $ cat /tmp/msg1 \
 		</span>
 		<div class="explanation">
 			Because the server is generating ephemeral
-			keys for each connection it is not using
-			the public key provided in the server
-			certificate.  To prove that the server owns
-			the server certificate (giving the certificate
-			validity in this TLS session), it signs
-			data that includes the hash of all handshake
+			keys for each session (optional in TLS 1.2,
+			mandatory in TLS 1.3) the session is not
+			inherently tied to the certificate as it
+			was in previous versions of TLS, when the
+			certificate's public/private key were used
+			for key exchange.
+			<br/><br/>
+			To prove
+			that the server owns the server certificate
+			(giving the certificate validity in this
+			TLS session), it signs a hash of the handshake
 			messages using the certificate's private
-			key.  This signature can be validated with
-			the certificate's public key.  See code
-			below for more details.
+			key.  The signature can be proven valid by
+			the client by using the certificate's public
+			key.
 			<ul>
 			<li><tt>08 04</tt> - reserved value for RSA-PSS-RSAE-SHA256 signature
-			<li><tt>%2 %3</tt> - length of signature (%xx2 or %dd2 bytes)
+			<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of signature data follows
 			<li><tt>%4 %5 %6 ... %-3 %-2 %-1</tt> - a signature over this handshake's hash
 			</ul>
 			We can verify the signature ourselves using the
@@ -1291,9 +1299,9 @@ Verified OK
 <div class="rec-label">Server Handshake Finished</div>
 <div class="rec-explanation">
 	To verify that the handshake was successful and not tampered
-	with, the server calculates verification data.
+	with, the server calculates verification data that client will agree on.
 	The verification data is built from a hash of all handshake
-	messages and verifies the integrity of the handshake process.
+	messages.
 </div>
 %file ../captures/caps/serverfinished
 <span class="record-data">
@@ -1307,13 +1315,12 @@ Verified OK
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>10</tt> - handshake message type 0x14 (finished)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake finished data follows
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
-	<span class="string decrypted">
+	<span class="string">
 		<span class="label">Verify Data</span>
 		<span class="bytes">
 %next 32
@@ -1345,7 +1352,7 @@ $ fin_key=$(./hkdf expandlabel $sht_secret "finished" "" 32)
 $ echo $fin_hash | xxd -r -p \
   | openssl dgst -sha256 -mac HMAC -macopt hexkey:$fin_key
 
-a2b22c83f1b01637d57bfa853d61a27057fddeebf975ec0367b93682c80eda14
+ea6ee176dccc4af1859e9e4e93f797eac9a78ce439301e35275ad43f3cddbde3
 </code></pre>
 			</codesample>
 		</div>
@@ -1370,11 +1377,14 @@ a2b22c83f1b01637d57bfa853d61a27057fddeebf975ec0367b93682c80eda14
 	this point (Client Hello, Server Hello, Encrypted Extensions,
 	Server Certificate, Server Certificate Verify, Server
 	Finished).  The hash does not include any of the 5-byte
-	"record" headers.  This "handshake_hash" is
+	"record" headers of ClientHello and ServerHello.  This
+	"handshake_hash" is
 	<tt class="longboi">22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b</tt>.
 	<br/><br/>
-	We then feed the hash and the handshake secret into a set of key derivation
-	operations using the HKDF algorithm:
+	We then feed the hash and the handshake secret into a set of
+	key derivation operations, designed to ensure the integrity
+	of the handshake process and to protect against known and
+	possible attacks:
 
 <pre>empty_hash = SHA256("")
 derived_secret = HKDF-Expand-Label(
@@ -1431,6 +1441,15 @@ $ client_application_key=$(./hkdf expandlabel $csecret "key" "" 16)
 $ server_application_key=$(./hkdf expandlabel $ssecret "key" "" 16)
 $ client_application_iv=$(./hkdf expandlabel $csecret "iv" "" 12)
 $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
+$ echo ckey: $client_application_key
+$ echo skey: $server_application_key
+$ echo civ: $client_application_iv
+$ echo siv: $server_application_iv
+
+ckey: 49134b95328f279f0183860589ac6707
+skey: 0b6d22c8ff68097ea871c672073773bf
+civ: bc4dd5f7b98acff85466261d
+siv: 1b13dd9f8d8f17091d34b349
 </code></pre>
 	</codesample>
 
@@ -1447,7 +1466,7 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 <div class="rec-outer">
 <div class="calculation client">
 <div class="rec-label">Client Application Keys Calc</div>
-<img class="illustration" src="images/key8.png" width="97" height="250"/>
+<img class="illustration" src="images/key7.png" width="97" height="250"/>
 <div class="rec-explanation">
 	The client now has the information to calculate the
 	keys used to encrypt application traffic.
@@ -1499,16 +1518,13 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 
 <div class="rec-outer">
 <div class="record client">
-<div class="rec-label">Client Finished Wrapper</div>
+<div class="rec-label">Wrapper</div>
 <div class="rec-explanation">
-	To reduce issues with middleware
-	that blocks unrecognized TLS protocols, the encrypted handshake is
-	disguised as a TLS 1.2 session that has performed a successful
-	session resume.
+	To reduce issues with middleboxes that block unrecognized
+	TLS protocols, TLS 1.3 records are disguised as TLS 1.2
+	records.
 	<br/><br/>
-	This TLS 1.2 wrapper only adds a single byte of overhead
-	(the wrapped record type).  This is more than made up for
-	by our cipher suite's lack of padding and EIV overhead.
+	The wrapped record is discussed in its own section below this one.
 </div>
 %file ../captures/caps/clientfinished
 <span class="record-data">
@@ -1519,21 +1535,14 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 %bytes
 		</span>
 		<div class="explanation">
-			TLS sessions are broken into the sending
-			and receiving of "records", which are blocks
-			of data with a type, a protocol version,
-			and a length.
-			<br/><br>
-			To reduce issues with middleware that
-			blocks unrecognized TLS
-			protocols, this record is disguised as TLS
-			1.2 application data.
+			The TLS 1.3 record is encrypted into a TLS
+			1.2 record "wrapper" that looks like
+			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
 			</ul>
-			All data following this header is the encrypted payload of the actual record.
 		</div>
 	</span>
 
@@ -1545,11 +1554,9 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 		</span>
 		<div class="explanation">
 			This data is encrypted with the client handshake key.
-			<br/><br/>
-			The decrypted data will be shown later in the record.
 		</div>
 	</span>
-	<span class="string encrypted">
+	<span class="string">
 		<span class="label">Auth Tag</span>
 		<span class="bytes">
 %next 16
@@ -1558,7 +1565,7 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 		<div class="explanation">
 			This is the AEAD authentication tag
 			that protects the integrity of the
-			encrypted data and its record header.
+			encrypted data and the record header.
 		</div>
 	</span>
 %empty
@@ -1580,7 +1587,7 @@ $ server_application_iv=$(./hkdf expandlabel $ssecret "iv" "" 12)
 			succeed.
 			<br/><br/>
 			Because the <tt>openssl</tt> command line
-			tool does not yet support the AEAD ciphers,
+			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
 			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
 			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
@@ -1616,11 +1623,11 @@ $ cat /tmp/msg2 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This handshake message is represented in its own section below.
 		</div>
 	</span>
 
-	<span class="string">
+	<span class="string decrypted">
 		<span class="label">Record Type</span>
 		<span class="bytes">
 %next 1
@@ -1644,10 +1651,10 @@ $ cat /tmp/msg2 \
 <div class="rec-label">Client Handshake Finished</div>
 <div class="rec-explanation">
 	To verify that the handshake was successful and not tampered
-	with, the client calculates verification data and encrypts
-	it with the client handshake key.
-	The verification data is built from a hash of all handshake
-	messages and verifies the integrity of the handshake process.
+	with, the client calculates verification data that the
+	server will agree on, and encrypts it with the client
+	handshake key.  The verification data is built from a hash
+	of all handshake messages.
 </div>
 %file ../captures/caps/clientfinishedplain
 <span class="record-data">
@@ -1661,13 +1668,12 @@ $ cat /tmp/msg2 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x14 (finished)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake finished data follow
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
-	<span class="string decrypted">
+	<span class="string">
 		<span class="label">Verify Data</span>
 		<span class="bytes">
 %next 32
@@ -1699,7 +1705,7 @@ $ fin_key=$(./hkdf expandlabel $cht_secret "finished" "" 32)
 $ echo $fin_hash | xxd -r -p \
   | openssl dgst -sha256 -mac HMAC -macopt hexkey:$fin_key
 
-0db5e06f69d73436d047561acd8f9f60a6fe93e7ec6f6125faa1598fd28170ec
+976017a77ae47f1658e28f7085fe37d149d1e9c91f56e1aebbe0c6bb054bd92b
 </code></pre>
 			</codesample>
 		</div>
@@ -1711,15 +1717,13 @@ $ echo $fin_hash | xxd -r -p \
 
 <div class="rec-outer">
 <div class="record client">
-<div class="rec-label">Client Data Wrapper</div>
+<div class="rec-label">Wrapper</div>
 <div class="rec-explanation">
-	To reduce issues with middleware that blocks unrecognized
+	To reduce issues with middleboxes that block unrecognized
 	TLS protocols, TLS 1.3 records are disguised as TLS 1.2
-	application data.
+	records.
 	<br/><br/>
-	This disguise adds a single byte of overhead
-	(the wrapped record type).  This is more than made up for
-	by our cipher suite's lack of padding and EIV overhead.
+	The wrapped record is discussed in its own section below this one.
 </div>
 %file ../captures/caps/clientdata
 <span class="record-data">
@@ -1730,15 +1734,9 @@ $ echo $fin_hash | xxd -r -p \
 %bytes
 		</span>
 		<div class="explanation">
-			TLS sessions are broken into the sending
-			and receiving of "records", which are blocks
-			of data with a type, a protocol version,
-			and a length.
-			<br/><br>
-			To reduce issues with middleware that
-			blocks unrecognized TLS
-			protocols, this record is disguised as TLS
-			1.2 application data.
+			The TLS 1.3 record is encrypted into a TLS
+			1.2 record "wrapper" that looks like
+			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
@@ -1761,7 +1759,7 @@ $ echo $fin_hash | xxd -r -p \
 		</div>
 	</span>
 
-	<span class="string encrypted">
+	<span class="string">
 		<span class="label">Auth Tag</span>
 		<span class="bytes">
 %next 16
@@ -1770,7 +1768,7 @@ $ echo $fin_hash | xxd -r -p \
 		<div class="explanation">
 			This is the AEAD authentication tag
 			that protects the integrity of the
-			encrypted data and its record header.
+			encrypted data and the record header.
 		</div>
 	</span>
 %empty
@@ -1791,7 +1789,7 @@ $ echo $fin_hash | xxd -r -p \
 			succeed.
 			<br/><br/>
 			Because the <tt>openssl</tt> command line
-			tool does not yet support the AEAD ciphers,
+			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
 			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
 			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
@@ -1826,7 +1824,7 @@ $ cat /tmp/msg3 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This application data is represented in its own section below.
 		</div>
 	</span>
 
@@ -1858,7 +1856,7 @@ $ cat /tmp/msg3 \
 </div>
 %file ../captures/caps/clientdataplain
 <span class="record-data">
-	<span class="string decrypted">
+	<span class="string">
 		<span class="label">Application Data</span>
 		<span class="bytes">
 %next 4
@@ -1876,14 +1874,13 @@ $ cat /tmp/msg3 \
 
 <div class="rec-outer">
 <div class="record server">
-<div class="rec-label">Server Data Wrapper</div>
+<div class="rec-label">Wrapper</div>
 <div class="rec-explanation">
-	To reduce issues with middleware that blocks unrecognized
+	To reduce issues with middleboxes that block unrecognized
 	TLS protocols, TLS 1.3 records are disguised as TLS 1.2
-	application data.
+	records.
 	<br/><br/>
-	This disguise adds a single byte of overhead
-	(the wrapped record type).
+	The wrapped records are discussed in their own sections below this one.
 </div>
 %file ../captures/caps/servertickets
 <span class="record-data">
@@ -1894,15 +1891,9 @@ $ cat /tmp/msg3 \
 %bytes
 		</span>
 		<div class="explanation">
-			TLS sessions are broken into the sending
-			and receiving of "records", which are blocks
-			of data with a type, a protocol version,
-			and a length.
-			<br/><br>
-			To reduce issues with middleware that
-			blocks unrecognized TLS
-			protocols, this record is disguised as TLS
-			1.2 application data.
+			The TLS 1.3 record is encrypted into a TLS
+			1.2 record "wrapper" that looks like
+			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
@@ -1925,7 +1916,7 @@ $ cat /tmp/msg3 \
 		</div>
 	</span>
 
-	<span class="string encrypted">
+	<span class="string">
 		<span class="label">Auth Tag</span>
 		<span class="bytes">
 %next 16
@@ -1934,7 +1925,7 @@ $ cat /tmp/msg3 \
 		<div class="explanation">
 			This is the AEAD authentication tag
 			that protects the integrity of the
-			encrypted data and its record header.
+			encrypted data and the record header.
 		</div>
 	</span>
 %empty
@@ -1955,7 +1946,7 @@ $ cat /tmp/msg3 \
 			succeed.
 			<br/><br/>
 			Because the <tt>openssl</tt> command line
-			tool does not yet support the AEAD ciphers,
+			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
 			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
 			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
@@ -1992,7 +1983,7 @@ $ cat /tmp/msg5 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This handshake message is represented in its own section below.
 		</div>
 	</span>
 
@@ -2003,7 +1994,7 @@ $ cat /tmp/msg5 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This handshake message is represented in its own section below.
 		</div>
 	</span>
 
@@ -2054,9 +2045,8 @@ $ cat /tmp/msg5 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x04 (new session ticket)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of session ticket data follow
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
@@ -2134,10 +2124,14 @@ $ cat /tmp/msg5 \
 %bytes
 		</span>
 		<div class="explanation">
-			The server provides some ticket extensions.
-			Interestingly these are not actual extensions
-			but are random data created as part of the
-			GREASE scheme to prevent badly written
+			The server provides an extension to provide
+			more information about the ticket or to
+			request a behavioral change from the client.
+			<br/><br/>
+			Interestingly this is not an actual extension
+			but is random data created as part of the
+			<a href="https://tools.ietf.org/html/draft-davidben-tls-grease-01">GREASE</a>
+			scheme to prevent badly written
 			software from rejecting unrecognized values.
 			<ul>
 			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of extension data follows
@@ -2153,7 +2147,7 @@ $ cat /tmp/msg5 \
 
 <div class="rec-outer">
 <div class="record server embedded">
-<div class="rec-label">Server New Session Ticket 1</div>
+<div class="rec-label">Server New Session Ticket 2</div>
 <div class="rec-explanation">
 	The server provides a session ticket that the client can
 	use to start a new session later.  Successfully resuming a
@@ -2164,7 +2158,7 @@ $ cat /tmp/msg5 \
 	because the server expects a browser to open multiple
 	connections, it makes a size vs. speed decision to provide
 	the client with two session tickets for each negotiated
-	session.  This is the first ticket.
+	session.  This is the second ticket.
 </div>
 %file ../captures/caps/serverticket2
 <span class="record-data">
@@ -2178,9 +2172,8 @@ $ cat /tmp/msg5 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x04 (new session ticket)
-			<li><tt>%1 %2 %3</tt> - payload length of %xxx1 (%ddd1) bytes
+			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of session ticket data follow
 			</ul>
-			All data following this header is the payload for this message.
 		</div>
 	</span>
 
@@ -2258,10 +2251,14 @@ $ cat /tmp/msg5 \
 %bytes
 		</span>
 		<div class="explanation">
-			The server provides some ticket extensions.
-			Interestingly these are not actual extensions
-			but are random data created as part of the
-			GREASE scheme to prevent badly written
+			The server provides an extension to provide
+			more information about the ticket or to
+			request a behavioral change from the client.
+			<br/><br/>
+			Interestingly this is not an actual extension
+			but is random data created as part of the
+			<a href="https://tools.ietf.org/html/draft-davidben-tls-grease-01">GREASE</a>
+			scheme to prevent badly written
 			software from rejecting unrecognized values.
 			<ul>
 			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of extension data follows
@@ -2277,15 +2274,13 @@ $ cat /tmp/msg5 \
 
 <div class="rec-outer">
 <div class="record server">
-<div class="rec-label">Server Data Wrapper</div>
+<div class="rec-label">Wrapper</div>
 <div class="rec-explanation">
-	To reduce issues with middleware that blocks unrecognized
+	To reduce issues with middleboxes that block unrecognized
 	TLS protocols, TLS 1.3 records are disguised as TLS 1.2
-	application data.
+	records.
 	<br/><br/>
-	This disguise adds a single byte of overhead
-	(the wrapped record type).  This is more than made up for
-	by our cipher suite's lack of padding and EIV overhead.
+	The wrapped record is discussed in its own section below this one.
 </div>
 %file ../captures/caps/serverdata
 <span class="record-data">
@@ -2296,15 +2291,9 @@ $ cat /tmp/msg5 \
 %bytes
 		</span>
 		<div class="explanation">
-			TLS sessions are broken into the sending
-			and receiving of "records", which are blocks
-			of data with a type, a protocol version,
-			and a length.
-			<br/><br>
-			To reduce issues with middleware that
-			blocks unrecognized TLS
-			protocols, this record is disguised as TLS
-			1.2 application data.
+			The TLS 1.3 record is encrypted into a TLS
+			1.2 record "wrapper" that looks like
+			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
@@ -2327,7 +2316,7 @@ $ cat /tmp/msg5 \
 		</div>
 	</span>
 
-	<span class="string encrypted">
+	<span class="string">
 		<span class="label">Auth Tag</span>
 		<span class="bytes">
 %next 16
@@ -2336,7 +2325,7 @@ $ cat /tmp/msg5 \
 		<div class="explanation">
 			This is the AEAD authentication tag
 			that protects the integrity of the
-			encrypted data and its record header.
+			encrypted data and the record header.
 		</div>
 	</span>
 %empty
@@ -2357,7 +2346,7 @@ $ cat /tmp/msg5 \
 			succeed.
 			<br/><br/>
 			Because the <tt>openssl</tt> command line
-			tool does not yet support the AEAD ciphers,
+			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
 			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
 			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
@@ -2391,7 +2380,7 @@ $ cat /tmp/msg4 \
 %bytes
 		</span>
 		<div class="explanation">
-			This data will be represented in its own section below.
+			This application data is represented in its own section below.
 		</div>
 	</span>
 
@@ -2423,7 +2412,7 @@ $ cat /tmp/msg4 \
 </div>
 %file ../captures/caps/serverdataplain
 <span class="record-data">
-	<span class="string decrypted">
+	<span class="string">
 		<span class="label">Application Data</span>
 		<span class="bytes">
 %next 4
@@ -2442,6 +2431,11 @@ $ cat /tmp/msg4 \
 	<div class="outerblock">
 	<p>The code for this project can be found
 	<a href="https://github.com/syncsynchalt/illustrated-tls">on GitHub</a>.</p>
+	</div>
+
+	<div class="outerblock">
+	<p>You may also be interested in the
+	<a href="https://tls.ulfheim.net/">TLS 1.2</a> version of this document.</p>
 	</div>
 
 	<div class="outerblock">
