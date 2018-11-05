@@ -86,6 +86,17 @@
 		});
 	};
 
+	ill.injectEmbedArrows = function() {
+		let els = document.querySelectorAll(".record.embedded");
+		[].forEach.call(els, function(r) {
+			let arrow = document.createElement("div"),
+				parent = r.parentNode;
+			arrow.setAttribute("class", "embed-arrow");
+			arrow.innerText = "➥";
+			parent.insertBefore(arrow, r);
+		});
+	};
+
 	ill.printMode = function() {
 		// add printmode css
 		let inject = document.createElement("link");
@@ -95,8 +106,6 @@
 		// open everything up
 		[].forEach.call(document.querySelectorAll(".record, .calculation"), function(el){
 			el.classList.add("selected");
-		});
-		[].forEach.call(document.querySelectorAll(".record, .calculation"), function(el){
 			el.classList.add("annotate");
 		});
 		[].forEach.call(document.querySelectorAll("codesample"), function(el){
@@ -130,6 +139,7 @@
 			ill.addShowCode(el);
 		});
 		ill.injectLabels();
+		ill.injectEmbedArrows();
 	};
 
 	window.onkeyup = function(e) {
