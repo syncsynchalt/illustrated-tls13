@@ -328,6 +328,19 @@ tt.longboi {
 	text-align: center;
 }
 
+/***** process block *****/
+
+process {
+	display: block;
+	margin: 1em;
+	padding-left: 1em;
+	font-size: 0.8em;
+}
+
+process pre {
+	margin: 0;
+}
+
 /***** codesample *****/
 
 codesample {
