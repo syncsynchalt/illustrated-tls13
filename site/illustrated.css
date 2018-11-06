@@ -352,13 +352,13 @@ processblock:before {
 	pointer-events: none;
 }
 .server processblock:before {
-	background: linear-gradient(transparent 100px, #D0E8F5);
+	background: linear-gradient(rgba(255,255,255,0) 100px, #D0E8F5);
 }
 .client processblock:before {
-	background: linear-gradient(transparent 100px, #D8EDCF);
+	background: linear-gradient(rgba(255,255,255,0) 125px, #D8EDCF);
 }
 .explanation processblock:before {
-	background: linear-gradient(transparent 100px, #FAF7DC);
+	background: linear-gradient(rgba(255,255,255,0) 125px, #FAF7DC);
 }
 
 processblock pre {
