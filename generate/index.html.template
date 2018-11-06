@@ -17,7 +17,7 @@
 <div class="container">
 	<h1>The Illustrated TLS 1.3 Connection</h1>
 
-	<h3>Every byte of a TLS 1.3 connection explained and reproduced.</h3>
+	<h3>Every byte explained and reproduced</h3>
 
 	<div class="outerblock">
 	<p>In this demonstration a client connects to a server,
@@ -2452,7 +2452,7 @@ $ cat /tmp/msg4 \
 
 	<div class="outerblock">
 	<p>The code for this project can be found
-	<a href="https://github.com/syncsynchalt/illustrated-tls">on GitHub</a>.</p>
+	<a href="https://github.com/syncsynchalt/illustrated-tls13">on GitHub</a>.</p>
 	</div>
 
 	<div class="outerblock">

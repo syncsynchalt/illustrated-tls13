@@ -118,14 +118,14 @@ tt.longboi {
 .embed-arrow {
 	position: absolute;
 	font-size: 2em;
-	color: #999;
+	color: #888;
 }
 
 .illustrated .server.record .rec-label:before {
-	content: "⤆ ";
+	content: "⇇ ";
 }
 .illustrated .client.record .rec-label:before {
-	content: "⤇ ";
+	content: "⇉ ";
 }
 .illustrated .server.record.embedded .rec-label:before,
 .illustrated .client.record.embedded .rec-label:before {
