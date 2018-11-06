@@ -760,7 +760,8 @@ server_handshake_iv = HKDF-Expand-Label(
 	requested length.
 	</ul>
 
-	I've created <a href="files/hkdf.sh">an HKDF tool</a> to perform these operations on the command line.
+	I've created <a href="files/hkdf.sh" download="hkdf">an HKDF tool</a>
+	to perform these operations on the command line.
 	<codesample>
 <pre><code>$ hello_hash=da75ce1139ac80dae4044da932350cf65c97ccc9e33f1e6f7d2d4b18b736ffd5
 $ shared_secret=df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624
@@ -1360,7 +1361,7 @@ verify_data = HMAC-SHA256(
 </pre>
 			</processblock>
 
-			We can use <a href="files/hkdf.sh">the HKDF
+			We can use <a href="files/hkdf.sh" download="hkdf">the HKDF
 			tool</a> to reproduce this on the command line.
 			<codesample>
 <pre><code>$ sht_secret=a2067265e7f0652a923d5d72ab0467c46132eeb968b6a32d311c805868548814
@@ -1446,7 +1447,8 @@ server_application_iv = HKDF-Expand-Label(
 </pre>
 	</processblock>
 
-	I've created <a href="files/hkdf.sh">an HKDF tool</a> to perform these operations on the command line.
+	I've created <a href="files/hkdf.sh" download="hkdf">an HKDF tool</a>
+	to perform these operations on the command line.
 	<codesample>
 <pre><code>$ handshake_hash=22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b
 $ handshake_secret=fb9fc80689b3a5d02c33243bf69a1b1b20705588a794304a6e7120155edf149a
@@ -1718,7 +1720,7 @@ verify_data = HMAC-SHA256(
 </pre>
 			</processblock>
 
-			We can use <a href="files/hkdf.sh">the HKDF
+			We can use <a href="files/hkdf.sh" download="hkdf">the HKDF
 			tool</a> to reproduce this this on the command line.
 			<codesample>
 <pre><code>$ cht_secret=ff0e5b965291c608c1e8cd267eefc0afcc5e98a2786373f0db47b04786d72aea

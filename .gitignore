@@ -7,4 +7,5 @@
 /tools/aes_128_gcm_decrypt
 /tools/aes_128_gcm_encrypt
 /generate/generator
+/generate/hkdf
 .*.swp
