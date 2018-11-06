@@ -647,8 +647,8 @@ pub:
 	keys used to encrypt the rest of the handshake.  It uses the following
 	information in this calculation:
 	<ul>
-	<li><a href="client-ephemeral-public.key">client public key</a> (from Client Hello)
-	<li><a href="server-ephemeral-private.key">server private key</a> (from Server Key Exchange Generation)
+	<li><a href="files/client-ephemeral-public.key">client public key</a> (from Client Hello)
+	<li><a href="files/server-ephemeral-private.key">server private key</a> (from Server Key Exchange Generation)
 	<li>SHA256 hash of ClientHello and ServerHello</li>
 	</ul>
 	First, the server finds the shared secret, which is the
@@ -658,7 +658,8 @@ pub:
 	algorithm.  The 32-byte result is found to be:
 	<pre class="ind2"><tt class="longboi">df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624</tt></pre>
 
-	I've provided <a href="files/curve25519-mult.c">a tool</a> to perform this calculation:
+	I've provided <a href="files/curve25519-mult.c" download="curve25519-mult.c">a tool</a>
+	to perform this calculation:
 	<codesample>
 <pre><code>$ cc -o curve25519-mult curve25519-mult.c
 $ ./curve25519-mult server-ephemeral-private.key \
@@ -788,8 +789,8 @@ siv: 4c042ddc120a38d1417fc815
 	keys that used to encrypt the rest of the handshake.  It uses the following
 	information in this calculation:
 	<ul>
-	<li><a href="server-ephemeral-public.key">server public key</a> (from Server Hello)
-	<li><a href="client-ephemeral-private.key">client private key</a> (from Client Key Exchange Generation)
+	<li><a href="files/server-ephemeral-public.key">server public key</a> (from Server Hello)
+	<li><a href="files/client-ephemeral-private.key">client private key</a> (from Client Key Exchange Generation)
 	<li>SHA256 hash of ClientHello and ServerHello</li>
 	</ul>
 	First, the client finds the shared secret, which is the
@@ -799,7 +800,8 @@ siv: 4c042ddc120a38d1417fc815
 	algorithm.  The 32-byte result is found to be:
 	<pre class="ind2"><tt class="longboi">df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624</tt></pre>
 
-	I've provided <a href="files/curve25519-mult.c">a tool</a> to perform this calculation:
+	I've provided <a href="files/curve25519-mult.c" download="curve25519-mult.c">a tool</a>
+	to perform this calculation:
 	<codesample>
 <pre><code>$ cc -o curve25519-mult curve25519-mult.c
 $ ./curve25519-mult client-ephemeral-private.key \
@@ -961,8 +963,8 @@ $ ./curve25519-mult client-ephemeral-private.key \
 			Because the <tt>openssl</tt> command line
 			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
-			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
-			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			<a href="files/aes_128_gcm_decrypt.c" download="aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c" download="aes_128_gcm_encrypt.c">encrypt</a>
 			this data.
 			<codesample>
 <pre><code>### from the "Server Handshake Keys Calc" step
@@ -1646,8 +1648,8 @@ siv: 1b13dd9f8d8f17091d34b349
 			Because the <tt>openssl</tt> command line
 			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
-			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
-			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			<a href="files/aes_128_gcm_decrypt.c" download="aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c" download="aes_128_gcm_encrypt.c">encrypt</a>
 			this data.
 			<codesample>
 <pre><code>### from the "Client Handshake Keys Calc" step
@@ -1839,8 +1841,8 @@ $ echo $fin_hash | xxd -r -p \
 			Because the <tt>openssl</tt> command line
 			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
-			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
-			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			<a href="files/aes_128_gcm_decrypt.c" download="aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c" download="aes_128_gcm_encrypt.c">encrypt</a>
 			this data.
 			<codesample>
 <pre><code>### from the "Client Application Keys Calc" step
@@ -1994,8 +1996,8 @@ $ cat /tmp/msg3 \
 			Because the <tt>openssl</tt> command line
 			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
-			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
-			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			<a href="files/aes_128_gcm_decrypt.c" download="aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c" download="aes_128_gcm_encrypt.c">encrypt</a>
 			this data.
 			<codesample>
 <pre><code>### from the "Server Application Keys Calc" step
@@ -2388,8 +2390,8 @@ $ cat /tmp/msg5 \
 			Because the <tt>openssl</tt> command line
 			tool does not yet support AEAD ciphers,
 			I've written command line tools to both
-			<a href="files/aes_128_gcm_decrypt.c">decrypt</a>
-			and <a href="files/aes_128_gcm_encrypt.c">encrypt</a>
+			<a href="files/aes_128_gcm_decrypt.c" download="aes_128_gcm_decrypt.c">decrypt</a>
+			and <a href="files/aes_128_gcm_encrypt.c" download="aes_128_gcm_encrypt.c">encrypt</a>
 			this data.
 			<codesample>
 <pre><code>### from the "Server Application Keys Calc" step

@@ -8,4 +8,5 @@
 /tools/aes_128_gcm_encrypt
 /generate/generator
 /generate/hkdf
+/generate/ill12
 .*.swp
