@@ -1109,7 +1109,7 @@ $ cat /tmp/msg1 \
 	a public key, and a signature from a third party asserting
 	that the owner of the certificate's hostname holds the
 	private key for this certificate
-	<li>an optional list of certificates, each of which signs
+	<li>an optional list of further certificates, each of which signs
 	the previous certificate, and which form a chain of trust
 	leading from the host certificate to a trusted certificate
 	that has been pre-installed on the client
