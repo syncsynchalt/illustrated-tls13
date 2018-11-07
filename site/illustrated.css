@@ -32,12 +32,15 @@ h1:after {
 h1:before {
 	content: "❧\00a0";
 }
-h1,
-h3 {
+h1, h3, h5 {
 	text-align: center;
 	padding: 10px;
 	max-width: 800px;
 	margin: 0 auto;
+}
+h5 {
+	font-style: italic;
+	font-family: serif;
 }
 
 pre {
