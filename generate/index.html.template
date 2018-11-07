@@ -638,9 +638,8 @@ pub:
 				<li><tt>00 33</tt> - assigned value for extension "Key Share"
 				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
 				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
-				<li><tt>%8 %9</tt> - %xx8 (%dd8) bytes of public key follows
-				<li><tt>%10 %11 ... %-2 %-1</tt></l> public key
-				<li><tt>%10 %11 ... %-2 %-1</tt></l> - public key from the step "Server Key Exchange Generation"
+				<li><tt>%6 %7</tt> - %xx6 (%dd6) bytes of public key follows
+				<li><tt>%8 %9 ... %-2 %-1</tt></l> - public key from the step "Server Key Exchange Generation"
 			</ul>
 		</div>
 	</span>
