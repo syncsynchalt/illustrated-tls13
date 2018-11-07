@@ -1128,13 +1128,22 @@ $ cat /tmp/msg1 \
 <div class="rec-label">Server Certificate</div>
 <img class="illustration" src="images/key3.png" width="130" height="250"/>
 <div class="rec-explanation">
-	The server provides a certificate containing the following:
+	The server sends one or more certificates:
 	<ul>
-	<li>the hostname of the server
-	<li>the public key used by this server
-	<li>proof from a trusted third party that the owner of this hostname holds the private key for this public key
+	<li>the certificate for this host, containing the hostname,
+	a public key, and a signature from a third party asserting
+	that the owner of the certificate's hostname holds the
+	private key for this certificate
+	<li>an optional list of certificates, each of which signs
+	the previous certificate, and which form a chain of trust
+	leading from the host certificate to a trusted certificate
+	that has been pre-installed on the client
 	</ul>
-	<a href="certificate.html" target="_blank">Explore the server certificate</a>.
+	In an effort to keep this example small we only send a
+	host certificate.  Certificates are in a binary format
+	called DER <a href="certificate.html" target="_blank">which
+	you can explore here</a>.
+
 </div>
 <span class="record-data">
 	<span class="string">

@@ -39,7 +39,7 @@
 %bytes
 		</span>
 		<div class="explanation">
-			Sequence of three entries follows, the certificate info, the signature algorithm, and the signature.
+			Sequence of three entries follows: the certificate info, the signature algorithm, and the signature.
 			<ul>
 			<li><tt>30</tt> - constructed universal type sequence
 			<li><tt>%1 %2 %3</tt> - long-form length of 0x321 (801) bytes
