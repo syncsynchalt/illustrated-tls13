@@ -211,9 +211,9 @@ pub:
 			implementation.
 			<ul>
 			<li><tt>00 06</tt> - 0x6 (6) bytes of cipher suite data
-			<li><tt>13 01</tt> - assigned value for <tt>AES-128-GCM-SHA256</tt>
-			<li><tt>13 02</tt> - assigned value for <tt>AES-256-GCM-SHA384</tt>
-			<li><tt>13 03</tt> - assigned value for <tt>CHACHA20-POLY1305-SHA256</tt>
+			<li><tt>13 01</tt> - assigned value for <tt>TLS_AES_128_GCM_SHA256</tt>
+			<li><tt>13 02</tt> - assigned value for <tt>TLS_AES_256_GCM_SHA384</tt>
+			<li><tt>13 03</tt> - assigned value for <tt>TLS_CHACHA20_POLY1305_SHA256</tt>
 			</ul>
 		</div>
 	</span>
@@ -564,7 +564,7 @@ pub:
 		</span>
 		<div class="explanation">
 			The server has selected cipher suite 0x1301
-			(AES-128-GCM-SHA256) from the list of options given by the client.
+			(TLS_AES_128_GCM_SHA256) from the list of options given by the client.
 		</div>
 	</span>
 
