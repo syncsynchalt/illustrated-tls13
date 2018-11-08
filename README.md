@@ -7,3 +7,5 @@ Published at https://tls13.ulfheim.net
 - `client/main.c`: client code
 - `boringssl/`: patch of boringssl that removes any random aspects of the documented connection
 - `captures/`: PCAP and keylog files
+
+See also https://github.com/syncsynchalt/illustrated-tls
