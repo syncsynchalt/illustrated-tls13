@@ -36,7 +36,7 @@
 <img class="illustration" src="images/key6.png" width="105" height="250"/>
 <div class="rec-explanation">
 	The client begins by calculating a private/public keypair
-	for key exchange.  Key exchange is a mathematical technique
+	for key exchange.  Key exchange is a mathematic technique
 	by which two parties can agree on the same number without
 	an eavesdropper being able to tell what that number is.
 	<br/><br/>
@@ -137,7 +137,7 @@ pub:
 %bytes
 		</span>
 		<div class="explanation">
-			A protocol version of 3.3 (meaning TLS 1.2)
+			A protocol version of "3,3" (meaning TLS 1.2)
 			is given.  Because middleboxes have been
 			created and widely deployed that do not
 			allow protocol versions that
@@ -149,11 +149,11 @@ pub:
 			version negotiation is performed using the
 			"Supported Versions" extension below.
 			<br/><br/>
-			The particular version number (3.3 representing
-			version 1.2) is due to TLS 1.0 being a minor
+			The unusual version number ("3,3" representing
+			TLS 1.2) is due to TLS 1.0 being a minor
 			revision of the SSL 3.0 protocol.  Therefore
-			TLS 1.0 is numeric version 3.1, TLS 1.1 is version
-			3.2, and so on.
+			TLS 1.0 is represented by "3,1", TLS 1.1 is
+			"3,2", and so on.
 		</div>
 	</span>
 
@@ -234,8 +234,7 @@ pub:
 			Previous versions of TLS supported
 			compression, which was found to leak
 			information about the encrypted data allowing
-			it to be read (see <a href="https://en.wikipedia.org/wiki/CRIME">CRIME</a>
-			and <a href="https://en.wikipedia.org/wiki/BREACH">BREACH</a>).
+			it to be read (see <a href="https://en.wikipedia.org/wiki/CRIME">CRIME</a>).
 			<br/><br/>
 			TLS 1.3 no longer allows compression, so
 			this field is always a single entry with
@@ -288,7 +287,7 @@ pub:
 			HTTP request was made.
 			<ul>
 				<li><tt>00 00</tt> - assigned value for extension "server name"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
+				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "server name" extension data follows
 				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of first (and only) list entry follows
 				<li><tt>%6</tt> - list entry is type 0x00 "DNS hostname"
 				<li><tt>%7 %8</tt> - %xx7 (%dd7) bytes of hostname follows
@@ -315,7 +314,7 @@ pub:
 			of the client's preference.
 			<ul>
 				<li><tt>00 0a</tt> - assigned value for extension "supported groups"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
+				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "supported group" extension data follows
 				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the curves list
 				<li><tt>00 1d</tt> - assigned value for the curve "x25519"
 				<li><tt>00 17</tt> - assigned value for the curve "secp256r1"
@@ -342,7 +341,7 @@ pub:
 			of the client's preference.
 			<ul>
 				<li><tt>00 0d</tt> - assigned value for extension "Signature Algorithms"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
+				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Signature Algorithms" extension data follows
 				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the following list of algorithms
 				<li><tt>04 03</tt> - assigned value for ECDSA-SECP256r1-SHA256
 				<li><tt>08 04</tt> - assigned value for RSA-PSS-RSAE-SHA256
@@ -373,7 +372,7 @@ pub:
 			handshake was sent in the clear.
 			<ul>
 				<li><tt>00 33</tt> - assigned value for extension "Key Share"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
+				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Key Share" extension data follows
 				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of key share data follows
 				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
 				<li><tt>%8 %9</tt> - %xx8 (%dd8) bytes of public key follows
@@ -395,7 +394,7 @@ pub:
 			session, this extension has no effect.
 			<ul>
 				<li><tt>00 2d</tt> - assigned value for extension "PSK Key Exchange Modes"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
+				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "PSK Key Exchange Modes" extension data follows
 				<li><tt>%4</tt> - %x4 (%d4) bytes of exchange modes follow
 				<li><tt>01</tt> - assigned value for "PSK with (EC)DHE key establishment"
 			</ul>
@@ -412,7 +411,7 @@ pub:
 			The client indicates its support of TLS 1.3.
 			<ul>
 				<li><tt>00 2b</tt> - assigned value for extension "Supported Versions"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
+				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Supported Versions" extension data follows
 				<li><tt>%4</tt> - %x4 (%d4) bytes of TLS versions follow
 				<li><tt>03 04</tt> - assigned value for TLS 1.3
 			</ul>
@@ -430,7 +429,7 @@ pub:
 <img class="illustration" src="images/key4.png" width="106" height="250"/>
 <div class="rec-explanation">
 	The server calculates a private/public keypair
-	for key exchange.  Key exchange is a mathematical technique
+	for key exchange.  Key exchange is a mathematic technique
 	by which two parties can agree on the same number without
 	an eavesdropper being able to tell what that number is.
 	<br/><br/>
@@ -499,7 +498,7 @@ pub:
 			and a length.
 			<ul>
 			<li><tt>%0</tt> - type is 0x16 (handshake record)
-			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
 			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of handshake message follows
 			</ul>
 		</div>
@@ -527,7 +526,7 @@ pub:
 %bytes
 		</span>
 		<div class="explanation">
-			A protocol version of 3.3 (meaning TLS 1.2)
+			A protocol version of "3,3" (meaning TLS 1.2)
 			is given.  Because middleboxes have been
 			created and widely deployed that do not
 			allow protocol versions that
@@ -539,11 +538,11 @@ pub:
 			version negotiation is performed using the
 			"Supported Versions" extension below.
 			<br/><br/>
-			The particular version number (3.3 representing
-			version 1.2) is due to TLS 1.0 being a minor
+			The unusual version number ("3,3" representing
+			TLS 1.2) is due to TLS 1.0 being a minor
 			revision of the SSL 3.0 protocol.  Therefore
-			TLS 1.0 is numeric version 3.1, TLS 1.1 is version
-			3.2, and so on.
+			TLS 1.0 is represented by "3.1", TLS 1.1 is
+			"3.2", and so on.
 		</div>
 	</span>
 
@@ -636,7 +635,7 @@ pub:
 			handshake was sent in the clear.
 			<ul>
 				<li><tt>00 33</tt> - assigned value for extension "Key Share"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
+				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Key Share" extension data follows
 				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
 				<li><tt>%6 %7</tt> - %xx6 (%dd6) bytes of public key follows
 				<li><tt>%8 %9 ... %-2 %-1</tt></l> - public key from the step "Server Key Exchange Generation"
@@ -654,7 +653,7 @@ pub:
 			The server indicates the negotiated TLS version of 1.3.
 			<ul>
 				<li><tt>00 2b</tt> - assigned value for extension "Supported Versions"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of extension data follows
+				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Supported Versions" extension data follows
 				<li><tt>03 04</tt> - assigned value for TLS 1.3
 			</ul>
 		</div>
@@ -873,7 +872,7 @@ $ ./curve25519-mult client-ephemeral-private.key \
 			and a length.
 			<ul>
 			<li><tt>14</tt> - type is 0x14 (ChangeCipherSpec record)
-			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
 			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
 			<li><tt>%5</tt> - the payload of this message is defined as the byte 0x01
 			</ul>
@@ -914,7 +913,7 @@ $ ./curve25519-mult client-ephemeral-private.key \
 			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
-			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
 			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
 			</ul>
 		</div>
@@ -1540,7 +1539,7 @@ siv: 1b13dd9f8d8f17091d34b349
 			and a length.
 			<ul>
 			<li><tt>14</tt> - type is 0x14 (ChangeCipherSpec record)
-			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
 			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
 			<li><tt>%5</tt> - the payload of this message is defined as the byte 0x01
 			</ul>
@@ -1575,7 +1574,7 @@ siv: 1b13dd9f8d8f17091d34b349
 			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
-			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
 			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
 			</ul>
 		</div>
@@ -1777,7 +1776,7 @@ $ echo $fin_hash | xxd -r -p \
 			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
-			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
 			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
 			</ul>
 			All data following this header is the encrypted form of the actual record.
@@ -1934,7 +1933,7 @@ $ cat /tmp/msg3 \
 			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
-			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
 			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
 			</ul>
 			All data following this header is the encrypted form of the actual record.
@@ -2000,7 +1999,7 @@ $ recordnum=0
 ### may need to add -I and -L flags for include and lib dirs
 $ cc -o aes_128_gcm_decrypt aes_128_gcm_decrypt.c -lssl -lcrypto
 $ echo "c4 d4 b7 1b 6f 4c 2f 30 13 02 74 e7 b4 6e 40 89 68 de 07 98 f3 60
-  ... snip ... 
+  ... snip ...
   9a 00 5f 88 e0 a2 da" | xxd -r -p > /tmp/msg5
 $ cat /tmp/msg5 \
   | ./aes_128_gcm_decrypt $iv $recordnum $key $recdata $authtag \
@@ -2172,7 +2171,7 @@ $ cat /tmp/msg5 \
 			scheme to prevent badly written
 			software from rejecting unrecognized values.
 			<ul>
-			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of extension data follows
+			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of "Ticket Extensions" extension data follows
 			<li><tt>%2 %3</tt> - the randomly generated extension type
 			<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the first extension
 			</ul>
@@ -2299,7 +2298,7 @@ $ cat /tmp/msg5 \
 			scheme to prevent badly written
 			software from rejecting unrecognized values.
 			<ul>
-			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of extension data follows
+			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of "Ticket Extensions" extension data follows
 			<li><tt>%2 %3</tt> - the randomly generated extension type
 			<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the first extension
 			</ul>
@@ -2334,7 +2333,7 @@ $ cat /tmp/msg5 \
 			application data.
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
-			<li><tt>%1 %2</tt> - legacy protocol version of 3.3 (TLS 1.2)
+			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
 			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
 			</ul>
 			All data following this header is the encrypted form of the actual record.

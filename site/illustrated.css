@@ -94,13 +94,6 @@ tt.longboi {
 
 /***** .record and .calculation *****/
 
-.embedmarker {
-	content: "->";
-	height: 100px;
-	width: 100px;
-	float: left;
-}
-
 .rec-outer {
 	max-width: 800px;
 	margin: 0.8em auto;
@@ -193,8 +186,7 @@ tt.longboi {
 	display: none;
 	margin-bottom: 1em;
 }
-.record.selected .rec-explanation,
-.calculation.selected .rec-explanation {
+.selected .rec-explanation {
 	display: block;
 }
 
