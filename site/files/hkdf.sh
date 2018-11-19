@@ -7,7 +7,8 @@ if [[ "$op" = "extract" ]]; then
 	if [[ "$hexsalt" = "" ]]; then
 		hexsalt="0000000000000000000000000000000000000000000000000000000000000000"
 	fi
-	echo -en "$hexkeymaterial" | xxd -r -p | openssl dgst -sha256 -mac HMAC -macopt hexkey:"$hexsalt" -hex
+	echo -en "$hexkeymaterial" | xxd -r -p | openssl dgst -sha256 -mac HMAC -macopt hexkey:"$hexsalt" -hex \
+		| sed -e 's/.* //'
 elif [[ "$op" = "expand" || "$op" = "expandlabel" ]]; then
 	if [[ "$op" = "expand" ]]; then
 		hexprk="$2" hexinfo="$3" length="$4"
@@ -28,7 +29,8 @@ elif [[ "$op" = "expand" || "$op" = "expandlabel" ]]; then
 	i=1
 	while [[ $(echo -n "$hexoutput" | wc -c) -lt $hexlength ]]; do
 		hexin=${hexlast}${hexinfo}$(printf "%02x" "$i")
-		hexlast=$(echo -en "$hexin" | xxd -r -p | openssl dgst -sha256 -mac HMAC -macopt hexkey:"$hexprk" -hex)
+		hexlast=$(echo -en "$hexin" | xxd -r -p | openssl dgst -sha256 -mac HMAC -macopt hexkey:"$hexprk" -hex \
+			| sed -e 's/.* //')
 		hexoutput=${hexoutput}${hexlast}
 		let i++
 	done
