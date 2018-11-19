@@ -105,11 +105,11 @@ pub:
 			and a length.
 			<ul>
 			<li><tt>%0</tt> - type is 0x16 (handshake record)
-			<li><tt>%1 %2</tt> - protocol version is 3.1 (also known as TLS 1.0)
+			<li><tt>%1 %2</tt> - protocol version is "3,1" (also known as TLS 1.0)
 			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of handshake message follows
 			</ul>
 			Interestingly the version in this record
-			is 3.1 (TLS 1.0) instead of 3.4 (TLS 1.3).
+			is "3,1" (TLS 1.0) instead of "3,4" (TLS 1.3).
 			This is done for interoperability with earlier
 			implementations.
 		</div>
@@ -541,8 +541,8 @@ pub:
 			The unusual version number ("3,3" representing
 			TLS 1.2) is due to TLS 1.0 being a minor
 			revision of the SSL 3.0 protocol.  Therefore
-			TLS 1.0 is represented by "3.1", TLS 1.1 is
-			"3.2", and so on.
+			TLS 1.0 is represented by "3,1", TLS 1.1 is
+			"3,2", and so on.
 		</div>
 	</span>
 
