@@ -164,7 +164,7 @@ pub:
 %bytes
 		</span>
 		<div class="explanation">
-			The client provides 32 bytes of random data.
+			The client provides 32 bytes of random data.  This data will be used later in the session.
 			In this example we've made the random data a predictable string.
 		</div>
 	</span>
@@ -553,7 +553,7 @@ pub:
 %bytes
 		</span>
 		<div class="explanation">
-			The server provides 32 bytes of random data.
+			The server provides 32 bytes of random data.  This data will be used later in the session.
 			In this example we've made the random data a predictable string.
 		</div>
 	</span>
