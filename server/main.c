@@ -58,6 +58,7 @@ SSL_CTX *create_context()
 	SSL_CTX *ctx = SSL_CTX_new(SSLv23_server_method());
 	if (!ctx)
 		die("Unable to create SSL context");
+	SSL_CTX_set_max_proto_version(ctx, TLS1_3_VERSION);
 	return ctx;
 }
 
