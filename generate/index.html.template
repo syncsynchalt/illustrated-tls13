@@ -1341,7 +1341,7 @@ Verified OK
 		<div class="explanation">
 			Each handshake message starts with a type and a length.
 			<ul>
-			<li><tt>10</tt> - handshake message type 0x14 (finished)
+			<li><tt>%0</tt> - handshake message type 0x14 (finished)
 			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake finished data follows
 			</ul>
 		</div>
