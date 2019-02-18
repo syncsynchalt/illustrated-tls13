@@ -1407,7 +1407,7 @@ ea6ee176dccc4af1859e9e4e93f797eac9a78ce439301e35275ad43f3cddbde3
 	We calculate the SHA256 hash of all handshake messages to
 	this point (Client Hello, Server Hello, Encrypted Extensions,
 	Server Certificate, Server Certificate Verify, Server
-	Finished).  The hash does not include any of the 5-byte
+	Finished).  The hash input does not include the 5-byte
 	"record" headers of ClientHello and ServerHello.  This
 	"handshake_hash" is
 	<tt class="longboi">22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b</tt>.
