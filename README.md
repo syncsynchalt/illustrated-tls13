@@ -27,4 +27,4 @@ cd ../server/
 ```
 Then open two terminals and run `./server` in the server/ subdir and `./client` in the client/ subdir.
 
-This has been shown to work on MacOS 10.14 and Ubuntu 16.04.6 LTS, and only has a few easy-to-find dependencies: gcc or clang, cmake, make.
+This has been shown to work on MacOS 10.14 and various Linuxes and only has a few easy-to-find dependencies: gcc or clang, golang, cmake, make, patch.
