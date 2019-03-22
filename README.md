@@ -8,7 +8,7 @@ Published at https://tls13.ulfheim.net
 - `boringssl/`: patch of boringssl that removes any random aspects of the documented connection
 - `captures/`: PCAP and keylog files
 
-See also https://github.com/syncsynchalt/illustrated-tls
+See also https://github.com/syncsynchalt/illustrated-tls for a TLS 1.2 version of this project.
 
 ### Build instructions
 
