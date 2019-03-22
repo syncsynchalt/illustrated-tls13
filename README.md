@@ -23,7 +23,6 @@ cd ../server/
 make
 cd ../client/
 make
-cd ../server/
 ```
 
 Then open two terminals and run `./server` in the server/ subdir and `./client` in the client/ subdir.
