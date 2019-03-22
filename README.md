@@ -14,7 +14,7 @@ See also https://github.com/syncsynchalt/illustrated-tls
 
 If you'd like a working example that reproduces exactly the same bytes documented on the site, the following should work:
 ```
-git clone git@github.com:syncsynchalt/illustrated-tls13.git
+git clone https://github.com/syncsynchalt/illustrated-tls13.git
 cd illustrated-tls13/
 cd boringssl/
 make
