@@ -5,7 +5,8 @@ Published at https://tls13.ulfheim.net
 - `site/`: page source for the finished product
 - `server/main.c`: server code
 - `client/main.c`: client code
-- `boringssl/`: patch of boringssl that removes any random aspects of the documented connection
+- `archive/`: previous version of this site, which was based on a pre-production BoringSSL patch
+- `openssl/`: patch of OpenSSL that removes any random aspects of the documented connection
 - `captures/`: PCAP and keylog files
 
 See also https://github.com/syncsynchalt/illustrated-tls for a TLS 1.2 version of this project.
