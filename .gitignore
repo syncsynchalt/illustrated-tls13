@@ -9,4 +9,7 @@
 /generate/generator
 /generate/hkdf
 /generate/ill12
+archive/generate/generator
+archive/generate/hkdf
+archive/generate/ill12
 .*.swp
