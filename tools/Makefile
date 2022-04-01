@@ -1,10 +1,10 @@
-CFLAGS += -I../boringssl/include -Wall
-LDFLAGS += -L../boringssl -lssl -lcrypto
+CFLAGS += -I../openssl/include -Wall
+LDFLAGS += -L../openssl -lssl -lcrypto
 
-all: aes_128_gcm_decrypt aes_128_gcm_encrypt
+all: aes_256_gcm_decrypt aes_256_gcm_encrypt
 
-aes_128_gcm_decrypt: aes_128_gcm_decrypt.c ../boringssl/libssl.a ../boringssl/libcrypto.a
-	$(CC) $(CFLAGS) -o $@ aes_128_gcm_decrypt.c $(LDFLAGS)
+aes_256_gcm_decrypt: aes_256_gcm_decrypt.c ../openssl/libssl.a ../openssl/libcrypto.a
+	$(CC) $(CFLAGS) -o $@ aes_256_gcm_decrypt.c $(LDFLAGS)
 
-aes_128_gcm_encrypt: aes_128_gcm_encrypt.c ../boringssl/libssl.a ../boringssl/libcrypto.a
-	$(CC) $(CFLAGS) -o $@ aes_128_gcm_encrypt.c $(LDFLAGS)
+aes_256_gcm_encrypt: aes_256_gcm_encrypt.c ../openssl/libssl.a ../openssl/libcrypto.a
+	$(CC) $(CFLAGS) -o $@ aes_256_gcm_encrypt.c $(LDFLAGS)

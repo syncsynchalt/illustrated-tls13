@@ -2,10 +2,14 @@
 /boringssl/build
 /boringssl/*.a
 /boringssl/include
+/openssl/openssl
+/openssl/build
+/openssl/*.a
+/openssl/include
 /server/server
 /client/client
-/tools/aes_128_gcm_decrypt
-/tools/aes_128_gcm_encrypt
+/tools/aes_256_gcm_decrypt
+/tools/aes_256_gcm_encrypt
 /generate/generator
 /generate/hkdf
 /generate/ill12

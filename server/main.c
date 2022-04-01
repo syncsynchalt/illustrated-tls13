@@ -81,6 +81,7 @@ void configure_context(SSL_CTX *ctx)
 int main(int argc, char **argv)
 {
 	// set up ssl
+	setenv("SERVER", "1", 1);
 	init_openssl();
 	SSL_CTX *ctx = create_context();
 	configure_context(ctx);

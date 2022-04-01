@@ -1,0 +1,191 @@
+diff --git a/crypto/rsa/rsa_pss.c b/crypto/rsa/rsa_pss.c
+index 33874bfe..dce82433 100644
+--- a/crypto/rsa/rsa_pss.c
++++ b/crypto/rsa/rsa_pss.c
+@@ -205,8 +205,9 @@ int RSA_padding_add_PKCS1_PSS_mgf1(RSA *rsa, unsigned char *EM,
+             ERR_raise(ERR_LIB_RSA, ERR_R_MALLOC_FAILURE);
+             goto err;
+         }
+-        if (RAND_bytes_ex(rsa->libctx, salt, sLen, 0) <= 0)
+-            goto err;
++        for (int ii = 0; ii < sLen; ii++) {
++            salt[ii] = 0x12;
++        }
+     }
+     maskedDBLen = emLen - hLen - 1;
+     H = EM + maskedDBLen;
+diff --git a/providers/implementations/keymgmt/ecx_kmgmt.c b/providers/implementations/keymgmt/ecx_kmgmt.c
+index 2be95086..c4001f20 100644
+--- a/providers/implementations/keymgmt/ecx_kmgmt.c
++++ b/providers/implementations/keymgmt/ecx_kmgmt.c
+@@ -592,8 +592,23 @@ static void *ecx_gen(struct ecx_gen_ctx *gctx)
+         ERR_raise(ERR_LIB_PROV, ERR_R_MALLOC_FAILURE);
+         goto err;
+     }
++#if 0
+     if (RAND_priv_bytes_ex(gctx->libctx, privkey, key->keylen, 0) <= 0)
+         goto err;
++#else
++    unsigned const char server_key_override[] = "\x90\x91\x92\x93\x94\x95\x96\x97\x98\x99\x9a\x9b\x9c\x9d\x9e\x9f"
++        "\xa0\xa1\xa2\xa3\xa4\xa5\xa6\xa7\xa8\xa9\xaa\xab\xac\xad\xae\xaf";
++    unsigned const char client_key_override[] = "\x20\x21\x22\x23\x24\x25\x26\x27\x28\x29\x2a\x2b\x2c\x2d\x2e\x2f"
++        "\x30\x31\x32\x33\x34\x35\x36\x37\x38\x39\x3a\x3b\x3c\x3d\x3e\x3f";
++    unsigned const char *key_source = 0;
++    if (getenv("SERVER") && strcmp(getenv("SERVER"), "1") == 0) {
++        key_source = server_key_override;
++    } else {
++        key_source = client_key_override;
++    }
++    memcpy(privkey, key_source, key->keylen);
++#endif
++
+     switch (gctx->type) {
+     case ECX_KEY_TYPE_X25519:
+         privkey[0] &= 248;
+diff --git a/ssl/s3_lib.c b/ssl/s3_lib.c
+index 0ce747bd..0f4c5121 100644
+--- a/ssl/s3_lib.c
++++ b/ssl/s3_lib.c
+@@ -4562,7 +4562,20 @@ int ssl_fill_hello_random(SSL *s, int server, unsigned char *result, size_t len,
+         l2n(Time, p);
+         ret = RAND_bytes_ex(s->ctx->libctx, p, len - 4, 0);
+     } else {
++#if 0
+         ret = RAND_bytes_ex(s->ctx->libctx, result, len, 0);
++#else
++        const char *random_override = 0;
++        if (server) {
++            random_override = "\x70\x71\x72\x73\x74\x75\x76\x77\x78\x79\x7a\x7b\x7c\x7d\x7e\x7f"
++                "\x80\x81\x82\x83\x84\x85\x86\x87\x88\x89\x8a\x8b\x8c\x8d\x8e\x8f";
++        } else {
++            random_override = "\x00\x01\x02\x03\x04\x05\x06\x07\x08\x09\x0a\x0b\x0c\x0d\x0e\x0f"
++                "\x10\x11\x12\x13\x14\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d\x1e\x1f";
++        }
++        memcpy(result, random_override, len);
++        ret = 1;
++#endif
+     }
+ 
+     if (ret > 0) {
+diff --git a/ssl/ssl_lib.c b/ssl/ssl_lib.c
+index f3993f0b..95e699a2 100644
+--- a/ssl/ssl_lib.c
++++ b/ssl/ssl_lib.c
+@@ -3285,6 +3285,7 @@ SSL_CTX *SSL_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq,
+     ret->split_send_fragment = SSL3_RT_MAX_PLAIN_LENGTH;
+ 
+     /* Setup RFC5077 ticket keys */
++#if 0
+     if ((RAND_bytes_ex(libctx, ret->ext.tick_key_name,
+                        sizeof(ret->ext.tick_key_name), 0) <= 0)
+         || (RAND_priv_bytes_ex(libctx, ret->ext.secure->tick_hmac_key,
+@@ -3292,10 +3293,26 @@ SSL_CTX *SSL_CTX_new_ex(OSSL_LIB_CTX *libctx, const char *propq,
+         || (RAND_priv_bytes_ex(libctx, ret->ext.secure->tick_aes_key,
+                                sizeof(ret->ext.secure->tick_aes_key), 0) <= 0))
+         ret->options |= SSL_OP_NO_TICKET;
++#else
++    for (size_t ii = 0; ii < sizeof(ret->ext.tick_key_name); ii++)
++        ret->ext.tick_key_name[ii] = 'A' + ii;
++    ret->ext.tick_key_name[sizeof(ret->ext.tick_key_name)-1] = 0;
++    for (size_t ii = 0; ii < sizeof(ret->ext.secure->tick_hmac_key); ii++)
++        ret->ext.secure->tick_hmac_key[ii] = 'B' + ii;
++    ret->ext.secure->tick_hmac_key[sizeof(ret->ext.secure->tick_hmac_key)-1] = 0;
++    for (size_t ii = 0; ii < sizeof(ret->ext.secure->tick_aes_key); ii++)
++        ret->ext.secure->tick_aes_key[ii] = 'C' + ii;
++    ret->ext.secure->tick_aes_key[sizeof(ret->ext.secure->tick_aes_key)-1] = 0;
++#endif
+ 
++#if 0
+     if (RAND_priv_bytes_ex(libctx, ret->ext.cookie_hmac_key,
+                            sizeof(ret->ext.cookie_hmac_key), 0) <= 0)
+         goto err;
++#else
++    for (size_t ii = 0; ii < sizeof(ret->ext.cookie_hmac_key); ii++)
++        ret->ext.cookie_hmac_key[ii] = 'D' + ii;
++#endif
+ 
+ #ifndef OPENSSL_NO_SRP
+     if (!ssl_ctx_srp_ctx_init_intern(ret))
+diff --git a/ssl/ssl_sess.c b/ssl/ssl_sess.c
+index 0e756c37..402d2477 100644
+--- a/ssl/ssl_sess.c
++++ b/ssl/ssl_sess.c
+@@ -315,6 +315,7 @@ unsigned int SSL_SESSION_get_compress_id(const SSL_SESSION *s)
+ static int def_generate_session_id(SSL *ssl, unsigned char *id,
+                                    unsigned int *id_len)
+ {
++#if 0
+     unsigned int retry = 0;
+     do
+         if (RAND_bytes_ex(ssl->ctx->libctx, id, *id_len, 0) <= 0)
+@@ -323,6 +324,13 @@ static int def_generate_session_id(SSL *ssl, unsigned char *id,
+            (++retry < MAX_SESS_ID_ATTEMPTS)) ;
+     if (retry < MAX_SESS_ID_ATTEMPTS)
+         return 1;
++#else
++    const char fake_session_id[] = "\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef"
++        "\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff";
++    memcpy(id, fake_session_id, *id_len);
++    if (*id_len)
++        return 1;
++#endif
+     /* else - woops a session_id match */
+     /*
+      * XXX We should also check the external cache -- but the probability of
+diff --git a/ssl/statem/statem_clnt.c b/ssl/statem/statem_clnt.c
+index c93c6b1f..85960fe6 100644
+--- a/ssl/statem/statem_clnt.c
++++ b/ssl/statem/statem_clnt.c
+@@ -1191,12 +1191,18 @@ int tls_construct_client_hello(SSL *s, WPACKET *pkt)
+             sess_id_len = sizeof(s->tmp_session_id);
+             s->tmp_session_id_len = sess_id_len;
+             session_id = s->tmp_session_id;
++#if 0
+             if (s->hello_retry_request == SSL_HRR_NONE
+                     && RAND_bytes_ex(s->ctx->libctx, s->tmp_session_id,
+                                      sess_id_len, 0) <= 0) {
+                 SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+                 return 0;
+             }
++#else
++            const char fake_session_id[] = "\xe0\xe1\xe2\xe3\xe4\xe5\xe6\xe7\xe8\xe9\xea\xeb\xec\xed\xee\xef"
++                "\xf0\xf1\xf2\xf3\xf4\xf5\xf6\xf7\xf8\xf9\xfa\xfb\xfc\xfd\xfe\xff";
++            memcpy(s->tmp_session_id, fake_session_id, 32);
++#endif
+         } else {
+             sess_id_len = 0;
+         }
+diff --git a/ssl/statem/statem_srvr.c b/ssl/statem/statem_srvr.c
+index d0d8d26e..b13764cf 100644
+--- a/ssl/statem/statem_srvr.c
++++ b/ssl/statem/statem_srvr.c
+@@ -3775,7 +3775,11 @@ static int construct_stateless_ticket(SSL *s, WPACKET *pkt, uint32_t age_add,
+ 
+         iv_len = EVP_CIPHER_get_iv_length(cipher);
+         if (iv_len < 0
++#if 0
+                 || RAND_bytes_ex(s->ctx->libctx, iv, iv_len, 0) <= 0
++#else
++                || memcpy(iv, "IVDATAIVDATA", iv_len) == NULL
++#endif
+                 || !EVP_EncryptInit_ex(ctx, cipher, NULL,
+                                        tctx->ext.secure->tick_aes_key, iv)
+                 || !ssl_hmac_init(hctx, tctx->ext.secure->tick_hmac_key,
+@@ -3906,6 +3910,7 @@ int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt)
+             SSLfatal(s, SSL_AD_INTERNAL_ERROR, ERR_R_INTERNAL_ERROR);
+             goto err;
+         }
++        age_add_u.age_add = 0;
+         s->session->ext.tick_age_add = age_add_u.age_add;
+ 
+         nonce = s->next_ticket_nonce;
+@@ -3926,7 +3931,8 @@ int tls_construct_new_session_ticket(SSL *s, WPACKET *pkt)
+         }
+         s->session->master_key_length = hashlen;
+ 
+-        s->session->time = time(NULL);
++        // s->session->time = time(NULL);
++        s->session->time = 1643432864;
+         ssl_session_calculate_timeout(s->session);
+         if (s->s3.alpn_selected != NULL) {
+             OPENSSL_free(s->session->ext.alpn_selected);

@@ -73,6 +73,7 @@ size_t resolve_hostname(const char *host, const char *port, struct sockaddr_stor
 int main(int argc, char **argv)
 {
 	// set up ssl
+	setenv("SERVER", "0", 1);
 	init_openssl();
 	SSL_CTX *ctx = create_context();
 	configure_context(ctx);
