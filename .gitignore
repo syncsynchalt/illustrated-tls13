@@ -13,6 +13,7 @@
 /generate/generator
 /generate/hkdf
 /generate/ill12
+/captures/caps/aes_256_gcm_decrypt*
 archive/generate/generator
 archive/generate/hkdf
 archive/generate/ill12

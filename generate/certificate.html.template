@@ -423,6 +423,7 @@
 </div>
 </div>
 %next 2
+%next 1
 %empty
 
 <div id="templates" style="display: none">
