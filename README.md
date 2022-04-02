@@ -18,7 +18,7 @@ If you'd like a working example that reproduces the exact handshake documented o
 ```
 git clone https://github.com/syncsynchalt/illustrated-tls13.git
 cd illustrated-tls13/
-cd boringssl/
+cd openssl/
 make
 cd ../server/
 make
