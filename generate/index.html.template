@@ -14,14 +14,16 @@
 </head>
 
 <body class="illustrated">
-<h1>The New Illustrated TLS Connection</h1>
+<h1>The Illustrated TLS 1.3 Connection</h1>
 <div class="container">
 
 	<h3>Every byte explained and reproduced</h3>
 
-	<h5>A revised edition in which we dissect the new manner
-	of secure and authenticated data exchange, the TLS 1.3
-	cryptographic protocol.</h5>
+	<div class="outerblock">
+	<p><em>Note: Updated April 2022 to move from an experimental
+	library to OpenSSL 3.0.1. The original version of this page is
+	archived <a href="archive/">here</a>.</em>
+	</div>
 
 	<div class="outerblock">
 	<p>In this demonstration a client connects to a server,
@@ -108,7 +110,7 @@ pub:
 			<ul>
 			<li><tt>%0</tt> - type is 0x16 (handshake record)
 			<li><tt>%1 %2</tt> - protocol version is "3,1" (also known as TLS 1.0)
-			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of handshake message follows
+			<li><tt>%3 %4</tt> - %nn3 bytes of handshake message follows
 			</ul>
 			Interestingly the version in this record
 			is "3,1" (TLS 1.0) instead of "3,4" (TLS 1.3).
@@ -127,7 +129,7 @@ pub:
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x01 (client hello)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of client hello data follows
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of client hello data follows
 			</ul>
 		</div>
 	</span>
@@ -193,7 +195,7 @@ pub:
 			client has generated random data to populate
 			this field.
 			<ul>
-			<li><tt>%0</tt> - %x0 (%d0) bytes of session ID follow
+			<li><tt>%0</tt> - %n0 bytes of session ID follow
 			<li><tt>%1 %2 ... %-2 %-1</tt> - fake session ID
 			</ul>
 		</div>
@@ -218,7 +220,7 @@ pub:
 			many previous suites with an easier all-in-one
 			implementation.
 			<ul>
-			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of cipher suite data
+			<li><tt>%0 %1</tt> - %nn0 bytes of cipher suite data
 			<li><tt>13 02</tt> - assigned value for <tt>TLS_AES_256_GCM_SHA384</tt>
 			<li><tt>13 03</tt> - assigned value for <tt>TLS_CHACHA20_POLY1305_SHA256</tt>
 			<li><tt>13 01</tt> - assigned value for <tt>TLS_AES_128_GCM_SHA256</tt>
@@ -244,7 +246,7 @@ pub:
 			the "null" compression method which performs
 			no change to the data.
 			<ul>
-			<li><tt>%0</tt> - %x0 (%d0) bytes of compression methods
+			<li><tt>%0</tt> - %n0 bytes of compression methods
 			<li><tt>00</tt> - assigned value for "null" compression
 			</ul>
 		</div>
@@ -261,7 +263,7 @@ pub:
 			extensions which the server can use to
 			take action or enable new features.
 			<ul>
-			<li><tt>%0 %1</tt> - the extensions will take %xx0 (%dd0) bytes of data
+			<li><tt>%0 %1</tt> - the extensions will take %nn0 bytes of data
 			</ul>
 			Each extension will start with two bytes
 			that indicate which extension it is, followed
@@ -290,10 +292,10 @@ pub:
 			HTTP request was made.
 			<ul>
 				<li><tt>00 00</tt> - assigned value for extension "server name"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "server name" extension data follows
-				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of first (and only) list entry follows
+				<li><tt>%2 %3</tt> - %nn2 bytes of "server name" extension data follows
+				<li><tt>%4 %5</tt> - %nn4 bytes of first (and only) list entry follows
 				<li><tt>%6</tt> - list entry is type 0x00 "DNS hostname"
-				<li><tt>%7 %8</tt> - %xx7 (%dd7) bytes of hostname follows
+				<li><tt>%7 %8</tt> - %nn7 bytes of hostname follows
 				<li><tt>%9 %10 %11 ... %-3 %-2 %-1</tt> - "example.ulfheim.net"
 			</ul>
 		</div>
@@ -310,8 +312,8 @@ pub:
 			elliptical curve data points in the following compression formats:
 			<ul>
 				<li><tt>%0 %1</tt> - assigned value for extension "ec point formats"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of format types follow
-				<li><tt>%4</tt> - %d4 bytes of format types follow
+				<li><tt>%2 %3</tt> - %nn2 bytes of format types follow
+				<li><tt>%4</tt> - %n4 bytes of format types follow
 				<li><tt>00</tt> - assigned value for format "uncompressed"
 				<li><tt>01</tt> - assigned value for format "ansiX962_compressed_prime"
 				<li><tt>02</tt> - assigned value for format "ansiX962_compressed_char2"
@@ -337,8 +339,8 @@ pub:
 			of the client's preference.
 			<ul>
 				<li><tt>00 0a</tt> - assigned value for extension "supported groups"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "supported group" extension data follows
-				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the curves list
+				<li><tt>%2 %3</tt> - %nn2 bytes of "supported group" extension data follows
+				<li><tt>%4 %5</tt> - %nn4 bytes of data are in the curves list
 				<li><tt>00 1d</tt> - assigned value for the curve "x25519"
 				<li><tt>00 17</tt> - assigned value for the curve "secp256r1"
 				<li><tt>00 1e</tt> - assigned value for the curve "x448"
@@ -364,7 +366,7 @@ pub:
 			to provide for this connection.
 			<ul>
 			<li><tt>00 23</tt> - assigned value for extension "Session Ticket"
-			<li><tt>%2 %3</tt> - %dd2 bytes of "Session Ticket" extension data follows
+			<li><tt>%2 %3</tt> - %nn2 bytes of "Session Ticket" extension data follows
 			</ul>
 		</div>
 	</span>
@@ -383,7 +385,7 @@ pub:
 			will have no effect in this session.
 			<ul>
 				<li><tt>00 16</tt> - assigned value for extension "Encrypt Then MAC"
-				<li><tt>%2 %3</tt> - %dd2 bytes of "Session Ticket" extension data follows
+				<li><tt>%2 %3</tt> - %nn2 bytes of "Session Ticket" extension data follows
 			</ul>
 		</div>
 	</span>
@@ -402,7 +404,7 @@ pub:
 			will have no effect in this session.
 			<ul>
 				<li><tt>00 17</tt> - assigned value for extension "Extended Master Secret"
-				<li><tt>%2 %3</tt> - %dd2 bytes of "Session Ticket" extension data follows
+				<li><tt>%2 %3</tt> - %nn2 bytes of "Session Ticket" extension data follows
 			</ul>
 		</div>
 	</span>
@@ -425,8 +427,8 @@ pub:
 			of the client's preference.
 			<ul>
 				<li><tt>00 0d</tt> - assigned value for extension "Signature Algorithms"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Signature Algorithms" extension data follows
-				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of data are in the following list of algorithms
+				<li><tt>%2 %3</tt> - %nn2 bytes of "Signature Algorithms" extension data follows
+				<li><tt>%4 %5</tt> - %nn4 bytes of data are in the following list of algorithms
 				<li><tt>04 03</tt> - assigned value for ECDSA-SECP256r1-SHA256
 				<li><tt>05 03</tt> - assigned value for ECDSA-SECP384r1-SHA384
 				<li><tt>06 03</tt> - assigned value for ECDSA-SECP521r1-SHA512
@@ -453,13 +455,13 @@ pub:
 		</span>
 		<div class="explanation">
 			The client indicates its support of TLS 1.3. This is the only indication in the
-			Client Hello record that hints that the client actually supports TLS 1.3, since
+			Client Hello record that hints the client supports TLS 1.3, since
 			for compatibility reasons it has otherwise pretended to be a TLS 1.2 connection
 			attempt.
 			<ul>
 				<li><tt>00 2b</tt> - assigned value for extension "Supported Versions"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Supported Versions" extension data follows
-				<li><tt>%4</tt> - %x4 (%d4) bytes of TLS versions follow
+				<li><tt>%2 %3</tt> - %nn2 bytes of "Supported Versions" extension data follows
+				<li><tt>%4</tt> - %n4 bytes of TLS versions follow
 				<li><tt>03 04</tt> - assigned value for TLS 1.3
 			</ul>
 		</div>
@@ -478,8 +480,8 @@ pub:
 			session, this extension has no effect.
 			<ul>
 				<li><tt>00 2d</tt> - assigned value for extension "PSK Key Exchange Modes"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "PSK Key Exchange Modes" extension data follows
-				<li><tt>%4</tt> - %x4 (%d4) bytes of exchange modes follow
+				<li><tt>%2 %3</tt> - %nn2 bytes of "PSK Key Exchange Modes" extension data follows
+				<li><tt>%4</tt> - %n4 bytes of exchange modes follow
 				<li><tt>01</tt> - assigned value for "PSK with (EC)DHE key establishment"
 			</ul>
 		</div>
@@ -501,10 +503,10 @@ pub:
 			handshake was sent in the clear.
 			<ul>
 				<li><tt>00 33</tt> - assigned value for extension "Key Share"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Key Share" extension data follows
-				<li><tt>%4 %5</tt> - %xx4 (%dd4) bytes of key share data follows
+				<li><tt>%2 %3</tt> - %nn2 bytes of "Key Share" extension data follows
+				<li><tt>%4 %5</tt> - %nn4 bytes of key share data follows
 				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
-				<li><tt>%8 %9</tt> - %xx8 (%dd8) bytes of public key follows
+				<li><tt>%8 %9</tt> - %nn8 bytes of public key follows
 				<li><tt>%10 %11 ... %-2 %-1</tt></l> - public key from the step "Client Key Exchange Generation"
 			</ul>
 		</div>
@@ -593,7 +595,7 @@ pub:
 			<ul>
 			<li><tt>%0</tt> - type is 0x16 (handshake record)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of handshake message follows
+			<li><tt>%3 %4</tt> - %nn3 bytes of handshake message follows
 			</ul>
 		</div>
 	</span>
@@ -608,7 +610,7 @@ pub:
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>02</tt> - handshake message type 0x02 (server hello)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of server hello data follows
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of server hello data follows
 			</ul>
 		</div>
 	</span>
@@ -664,7 +666,7 @@ pub:
 			server echos the session ID provided by the
 			client, if any.
 			<ul>
-			<li><tt>%0</tt> - %x0 (%d0) bytes of session ID follow
+			<li><tt>%0</tt> - %n0 bytes of session ID follow
 			<li><tt>%1 %2 ... %-2 %-1</tt> - session ID copied from Client Hello
 			</ul>
 		</div>
@@ -709,7 +711,7 @@ pub:
 			message, the server knows that the client
 			will understand and support all extensions listed.
 			<ul>
-			<li><tt>%0 %1</tt> - the extensions will take %xx0 (%dd0) bytes of data
+			<li><tt>%0 %1</tt> - the extensions will take %nn0 bytes of data
 			</ul>
 		</div>
 	</span>
@@ -724,7 +726,7 @@ pub:
 			The server indicates the negotiated TLS version of 1.3.
 			<ul>
 				<li><tt>00 2b</tt> - assigned value for extension "Supported Versions"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Supported Versions" extension data follows
+				<li><tt>%2 %3</tt> - %nn2 bytes of "Supported Versions" extension data follows
 				<li><tt>03 04</tt> - assigned value for TLS 1.3
 			</ul>
 		</div>
@@ -745,9 +747,9 @@ pub:
 			handshake was sent in the clear.
 			<ul>
 				<li><tt>00 33</tt> - assigned value for extension "Key Share"
-				<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of "Key Share" extension data follows
+				<li><tt>%2 %3</tt> - %nn2 bytes of "Key Share" extension data follows
 				<li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
-				<li><tt>%6 %7</tt> - %xx6 (%dd6) bytes of public key follows
+				<li><tt>%6 %7</tt> - %nn6 bytes of public key follows
 				<li><tt>%8 %9 ... %-2 %-1</tt></l> - public key from the step "Server Key Exchange Generation"
 			</ul>
 		</div>
@@ -993,7 +995,7 @@ $ ./curve25519-mult client-ephemeral-private.key \
 			<ul>
 			<li><tt>14</tt> - type is 0x14 (ChangeCipherSpec record)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - the length of the record payload is %nn3 bytes
 			<li><tt>%5</tt> - the payload of this message is defined as the byte 0x01
 			</ul>
 		</div>
@@ -1034,7 +1036,7 @@ $ ./curve25519-mult client-ephemeral-private.key \
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
+			<li><tt>%3 %4</tt> - %nn3 bytes of wrapped data follows
 			</ul>
 		</div>
 	</span>
@@ -1158,7 +1160,7 @@ $ cat /tmp/msg1 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x08 (encrypted extensions)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake message data follows
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of handshake message data follows
 			</ul>
 		</div>
 	</span>
@@ -1171,7 +1173,7 @@ $ cat /tmp/msg1 \
 		</span>
 		<div class="explanation">
 			<ul>
-			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of extension data follows
+			<li><tt>%0 %1</tt> - %nn0 bytes of extension data follows
 			</ul>
 		</div>
 	</span>
@@ -1210,7 +1212,7 @@ $ cat /tmp/msg1 \
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
+			<li><tt>%3 %4</tt> - %nn3 bytes of wrapped data follows
 			</ul>
 		</div>
 	</span>
@@ -1358,7 +1360,7 @@ $ cat /tmp/msg1 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x0B (certificate)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of certificate payload follow
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of certificate payload follow
 			</ul>
 		</div>
 	</span>
@@ -1373,7 +1375,7 @@ $ cat /tmp/msg1 \
 			This record is empty because this certificate was not sent in
 			response to a Certificate Request.
 			<ul>
-			<li><tt>%0</tt> - %x0 (%d0) bytes of request context follows
+			<li><tt>%0</tt> - %n0 bytes of request context follows
 			</ul>
 		</div>
 	</span>
@@ -1386,7 +1388,7 @@ $ cat /tmp/msg1 \
 		</span>
 		<div class="explanation">
 			<ul>
-			<li><tt>%0 %1 %2</tt> - %xxx0 (%ddd0) bytes of certificates follow
+			<li><tt>%0 %1 %2</tt> - %nnn0 bytes of certificates follow
 			</ul>
 		</div>
 	</span>
@@ -1400,7 +1402,7 @@ $ cat /tmp/msg1 \
 		<div class="explanation">
 			The length of the first (and only) certificate.
 			<ul>
-			<li><tt>%0 %1 %2</tt> - %xxx0 (%ddd0) bytes of certificate follows
+			<li><tt>%0 %1 %2</tt> - %nnn0 bytes of certificate follows
 			</ul>
 		</div>
 	</span>
@@ -1439,7 +1441,7 @@ $ cat /tmp/msg1 \
 		<div class="explanation">
 			The server can provide extension data for the certificate.
 			<ul>
-			<li><tt>%0 %1</tt> - %dd0 bytes of extension data follows
+			<li><tt>%0 %1</tt> - %nn0 bytes of extension data follows
 			</ul>
 		</div>
 	</span>
@@ -1478,7 +1480,7 @@ $ cat /tmp/msg1 \
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
+			<li><tt>%3 %4</tt> - %nn3 bytes of wrapped data follows
 			</ul>
 		</div>
 	</span>
@@ -1607,7 +1609,7 @@ $ cat /tmp/msg1 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x0f (certificate verify)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake message data follows
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of handshake message data follows
 			</ul>
 		</div>
 	</span>
@@ -1637,7 +1639,7 @@ $ cat /tmp/msg1 \
 			key.
 			<ul>
 			<li><tt>08 04</tt> - reserved value for RSA-PSS-RSAE-SHA256 signature
-			<li><tt>%2 %3</tt> - %xx2 (%dd2) bytes of signature data follows
+			<li><tt>%2 %3</tt> - %nn2 bytes of signature data follows
 			<li><tt>%4 %5 %6 ... %-3 %-2 %-1</tt> - a signature over this handshake's hash
 			</ul>
 			The signing process can't be reproduced byte-for-byte
@@ -1729,7 +1731,7 @@ Verified OK
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
+			<li><tt>%3 %4</tt> - %nn3 bytes of wrapped data follows
 			</ul>
 		</div>
 	</span>
@@ -1858,7 +1860,7 @@ $ cat /tmp/msg1 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x14 (finished)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake finished data follows
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of handshake finished data follows
 			</ul>
 		</div>
 	</span>
@@ -2083,7 +2085,7 @@ civ: bb007956f474b25de902432f
 			<ul>
 			<li><tt>14</tt> - type is 0x14 (ChangeCipherSpec record)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - the length of the record payload is %nn3 bytes
 			<li><tt>%5</tt> - the payload of this message is defined as the byte 0x01
 			</ul>
 		</div>
@@ -2118,7 +2120,7 @@ civ: bb007956f474b25de902432f
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - %xx3 (%dd3) bytes of wrapped data follows
+			<li><tt>%3 %4</tt> - %nn3 bytes of wrapped data follows
 			</ul>
 		</div>
 	</span>
@@ -2247,7 +2249,7 @@ $ cat /tmp/msg2 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x14 (finished)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of handshake finished data follow
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of handshake finished data follow
 			</ul>
 		</div>
 	</span>
@@ -2330,7 +2332,7 @@ bff56a671b6c659d0a7c5dd18428f58bdd38b184a3ce342d9fde95cbd5056f7da7918ee320eab7a9
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - the length of the record payload is %nn3 bytes
 			</ul>
 			All data following this header is the encrypted form of the actual record.
 		</div>
@@ -2487,7 +2489,7 @@ $ cat /tmp/msg3 \
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - the length of the record payload is %nn3 bytes
 			</ul>
 			All data following this header is the encrypted form of the actual record.
 		</div>
@@ -2626,7 +2628,7 @@ $ cat /tmp/msg5 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x04 (new session ticket)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of session ticket data follow
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of session ticket data follow
 			</ul>
 		</div>
 	</span>
@@ -2638,7 +2640,7 @@ $ cat /tmp/msg5 \
 %bytes
 		</span>
 		<div class="explanation">
-			The ticket lifetime of %xxxx0 (%dddd0) seconds, or 2 hours.
+			The ticket lifetime of %nnnn0 seconds, or 2 hours.
 		</div>
 	</span>
 
@@ -2668,7 +2670,7 @@ $ cat /tmp/msg5 \
 			A per-ticket value that is unique to each
 			ticket generated during this session.
 			<ul>
-			<li><tt>%0</tt> - %x0 (%d0) bytes of nonce data follows
+			<li><tt>%0</tt> - %n0 bytes of nonce data follows
 			<li><tt>%1 %2 %3 %5 %6 %7 %8</tt> - nonce value
 			</ul>
 		</div>
@@ -2683,7 +2685,7 @@ $ cat /tmp/msg5 \
 		<div class="explanation">
 			This is the ticket that can be sent to the
 			server to resume a session.  The data inside
-			is probably meaningful to the server, and
+			is meaningful to the server, and
 			may contain enough information for the
 			server to safely resume the connection
 			without storing any information on the
@@ -2692,7 +2694,7 @@ $ cat /tmp/msg5 \
 			client.
 
 			<ul>
-			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of ticket data follows
+			<li><tt>%0 %1</tt> - %nn0 bytes of ticket data follows
 			<li><tt>%2 %3 ... %-2 %-1</tt> - session ticket
 			</ul>
 		</div>
@@ -2710,7 +2712,7 @@ $ cat /tmp/msg5 \
 			request a behavioral change from the client.
 			<br/><br/>
 			<ul>
-			<li><tt>%0 %1</tt> - %d0 bytes of "Ticket Extensions" extension data follows
+			<li><tt>%0 %1</tt> - %n0 bytes of "Ticket Extensions" extension data follows
 			</ul>
 		</div>
 	</span>
@@ -2746,7 +2748,7 @@ $ cat /tmp/msg5 \
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - the length of the record payload is %nn3 bytes
 			</ul>
 			All data following this header is the encrypted form of the actual record.
 		</div>
@@ -2885,7 +2887,7 @@ $ cat /tmp/msg5 \
 			Each handshake message starts with a type and a length.
 			<ul>
 			<li><tt>%0</tt> - handshake message type 0x04 (new session ticket)
-			<li><tt>%1 %2 %3</tt> - %xxx1 (%ddd1) bytes of session ticket data follow
+			<li><tt>%1 %2 %3</tt> - %nnn1 bytes of session ticket data follow
 			</ul>
 		</div>
 	</span>
@@ -2897,7 +2899,7 @@ $ cat /tmp/msg5 \
 %bytes
 		</span>
 		<div class="explanation">
-			The ticket lifetime of %xxxx0 (%dddd0) seconds, or 2 hours.
+			The ticket lifetime of %nnnn0 seconds, or 2 hours.
 		</div>
 	</span>
 
@@ -2927,7 +2929,7 @@ $ cat /tmp/msg5 \
 			A per-ticket value that is unique to each
 			ticket generated during this session.
 			<ul>
-			<li><tt>%0</tt> - %x0 (%d0) bytes of nonce data follows
+			<li><tt>%0</tt> - %n0 bytes of nonce data follows
 			<li><tt>%1 %2 %3 %5 %6 %7 %8</tt> - nonce value
 			</ul>
 		</div>
@@ -2942,7 +2944,7 @@ $ cat /tmp/msg5 \
 		<div class="explanation">
 			This is the ticket that can be sent to the
 			server to resume a session.  The data inside
-			is probably meaningful to the server, and
+			is meaningful to the server, and
 			may contain enough information for the
 			server to safely resume the connection
 			without storing any information on the
@@ -2951,7 +2953,7 @@ $ cat /tmp/msg5 \
 			client.
 
 			<ul>
-			<li><tt>%0 %1</tt> - %xx0 (%dd0) bytes of ticket data follows
+			<li><tt>%0 %1</tt> - %nn0 bytes of ticket data follows
 			<li><tt>%2 %3 ... %-2 %-1</tt> - session ticket
 			</ul>
 		</div>
@@ -2969,7 +2971,7 @@ $ cat /tmp/msg5 \
 			request a behavioral change from the client.
 			<br/><br/>
 			<ul>
-			<li><tt>%0 %1</tt> - %d0 bytes of "Ticket Extensions" extension data follows
+			<li><tt>%0 %1</tt> - %n0 bytes of "Ticket Extensions" extension data follows
 			</ul>
 		</div>
 	</span>
@@ -3005,7 +3007,7 @@ $ cat /tmp/msg5 \
 			<ul>
 			<li><tt>%0</tt> - type is 0x17 (application data)
 			<li><tt>%1 %2</tt> - legacy protocol version of "3,3" (TLS 1.2)
-			<li><tt>%3 %4</tt> - the length of the record payload is %xx3 (%dd3) bytes
+			<li><tt>%3 %4</tt> - the length of the record payload is %nn3 bytes
 			</ul>
 			All data following this header is the encrypted form of the actual record.
 		</div>
