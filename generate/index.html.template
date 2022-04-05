@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>The Illustrated TLS 1.3 Connection: Every Byte Explained</title>
+	<title>The (Updated) Illustrated TLS 1.3 Connection: Every Byte Explained</title>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 	<meta name="format-detection" content="telephone=no"/>
@@ -2003,8 +2003,7 @@ server_application_iv = HKDF-Expand-Label(
 	I've created <a href="files/hkdf-384.sh" download="hkdf-384">an HKDF tool</a>
 	to perform these operations on the command line.
 	<codesample>
-<pre><code>
-$ handshake_hash=fa6800169a6baac19159524fa7b9721b41be3c9db6f3f93fa5ff7e3db3ece204d2b456c51046e40ec5312c55a86126f5
+<pre><code>$ handshake_hash=fa6800169a6baac19159524fa7b9721b41be3c9db6f3f93fa5ff7e3db3ece204d2b456c51046e40ec5312c55a86126f5
 $ handshake_secret=bdbbe8757494bef20de932598294ea65b5e6bf6dc5c02a960a2de2eaa9b07c929078d2caa0936231c38d1725f179d299
 $ zero_key=000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000
 $ empty_hash=$(openssl sha384 < /dev/null | sed -e 's/.* //')
@@ -2043,7 +2042,6 @@ civ: bb007956f474b25de902432f
 <div class="rec-outer">
 <div class="calculation client">
 <div class="rec-label">Client Application Keys Calc</div>
-<img class="illustration" src="images/key7.png" width="97" height="250"/>
 <div class="rec-explanation">
 	The client now has the information to calculate the
 	keys used to encrypt application traffic.
@@ -2181,9 +2179,9 @@ $ authtag=0a69a88d4bf635c85eb874aebc9dfde8
 $ recordnum=0
 ### may need to add -I and -L flags for include and lib dirs
 $ cc -o aes_256_gcm_decrypt aes_256_gcm_decrypt.c -lssl -lcrypto
-$ echo "9f f9 b0 63 17 51 77 32 2a 46 dd 98 96 f3 c3 bb 82 0a
-  ... snip ...
-  18 bc cf 65 7a 96 08 24 e9 a1 93 64 83 7c 35" | xxd -r -p > /tmp/msg2
+$ echo "9f f9 b0 63 17 51 77 32 2a 46 dd 98 96 f3 c3 bb 82 0a b5
+  17 43 eb c2 5f da dd 53 45 4b 73 de b5 4c c7 24 8d 41 1a 18 bc
+  cf 65 7a 96 08 24 e9 a1 93 64 83 7c 35" | xxd -r -p > /tmp/msg2
 $ cat /tmp/msg2 \
   | ./aes_256_gcm_decrypt $iv $recordnum $key $recdata $authtag \
   | hexdump -C
