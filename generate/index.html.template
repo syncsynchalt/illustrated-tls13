@@ -441,7 +441,7 @@ pub:
 				<li><tt>08 05</tt> - assigned value for RSA-PSS-RSAE-SHA384
 				<li><tt>08 06</tt> - assigned value for RSA-PSS-RSAE-SHA512
 				<li><tt>04 01</tt> - assigned value for RSA-PKCS1-SHA256
-				<li><tt>05 01</tt> - assigned value for RSA-PKCS1-SHA386
+				<li><tt>05 01</tt> - assigned value for RSA-PKCS1-SHA384
 				<li><tt>06 01</tt> - assigned value for RSA-PKCS1-SHA512
 			</ul>
 		</div>
