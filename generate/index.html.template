@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<title>The (Updated) Illustrated TLS 1.3 Connection: Every Byte Explained</title>
+	<title>The Illustrated TLS 1.3 Connection: Every Byte Explained</title>
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"/>
 	<meta name="format-detection" content="telephone=no"/>
@@ -11,6 +11,21 @@
 	<link rel="stylesheet" href="frombootstrap.css"/>
 	<link rel="stylesheet" href="illustrated.css"/>
 	<script src="illustrated.js"></script>
+
+	<!-- Facebook Meta Tags -->
+	<meta property="og:url" content="https://tls13.ulfheim.net/">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="The Illustrated TLS 1.3 Connection">
+	<meta property="og:description" content="Every byte of a TLS connection explained and reproduced">
+	<meta property="og:image" content="https://tls13.ulfheim.net/images/og.png">
+
+	<!-- Twitter Meta Tags -->
+	<meta name="twitter:card" content="summary_large_image">
+	<meta property="twitter:domain" content="tls13.ulfheim.net">
+	<meta property="twitter:url" content="https://tls13.ulfheim.net/">
+	<meta name="twitter:title" content="The Illustrated TLS 1.3 Connection">
+	<meta name="twitter:description" content="Every byte of a TLS connection explained and reproduced">
+	<meta name="twitter:image" content="https://tls13.ulfheim.net/images/og.png">
 </head>
 
 <body class="illustrated">
