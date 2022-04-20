@@ -118,17 +118,21 @@ tt.longboi {
 }
 
 .illustrated .server.record .rec-label:before {
-	content: "⇇ ";
+	content: "❰ ";
+	color: #888;
 }
 .illustrated .client.record .rec-label:before {
-	content: "⇉ ";
+	content: "❱ ";
+	color: #888;
 }
 .illustrated .server.record.embedded .rec-label:before,
 .illustrated .client.record.embedded .rec-label:before {
 	content: "";
 }
 .illustrated .calculation .rec-label:before {
-	content: "÷ ";
+	content: "± ";
+	font-weight: bold;
+	color: #888;
 }
 
 .rec-label {
@@ -158,6 +162,7 @@ tt.longboi {
 }
 .illustrated .record.selected .rec-label:after,
 .illustrated .calculation.selected .rec-label:after {
+	color: #888;
 	content: " ×";
 	font-weight: bold;
 	cursor: pointer;
@@ -210,11 +215,11 @@ tt.longboi {
 
 /***** .record-data *****/
 
-.client .record-data .string:hover {
-	color: teal;
+.client .record-data .string .bytes:hover {
+	background-color: #FFEFD5;
 }
-.server .record-data .string:hover {
-	color: darkgreen;
+.server .record-data .string .bytes:hover {
+	background-color: #FFEFD5;
 }
 .record.annotate .record-data .string:hover {
 	color: inherit;
@@ -302,9 +307,17 @@ tt.longboi {
 
 .record .decryption > .label:before {
 	content: "⬇ ";
+	font-weight: bold;
+	color: #888;
 }
 .record .decryption > .label:after {
 	content: " ⬇";
+	font-weight: bold;
+	color: #888;
+}
+
+.string .bytes {
+	padding: 0.2em 0;
 }
 
 .string.encrypted .bytes {
@@ -331,10 +344,12 @@ processblock {
 	margin: 1em;
 	padding-left: 1em;
 	font-size: 0.9em;
-	max-height: 150px;
+	/* max-height: 150px; */
 	overflow: hidden;
 	transition: all 0.3s;
 	cursor-style: pointer;
+
+	font-size: 0.8em;
 }
 
 processblock:before {
@@ -346,6 +361,7 @@ processblock:before {
 	top: 0;
 	pointer-events: none;
 }
+/*
 .server processblock:before {
 	background: linear-gradient(rgba(255,255,255,0) 100px, #D0E8F5);
 }
@@ -355,11 +371,13 @@ processblock:before {
 .explanation processblock:before {
 	background: linear-gradient(rgba(255,255,255,0) 125px, #FAF7DC);
 }
+*/
 
 processblock pre {
 	margin: 0;
 }
 
+/*
 processblock.clicked,
 processblock.notrunc {
 	max-height: 99999px;
@@ -369,6 +387,7 @@ processblock.clicked:before,
 processblock.notrunc:before {
 	background: none;
 }
+*/
 
 /***** codesample *****/
 
@@ -435,27 +454,50 @@ button.annotate-toggle {
 	color: #fff;
 	border: solid 1px #da7c0c;
 	background: #f78d1d;
-	background: -webkit-gradient(linear, left top, left bottom, from(#faa51a), to(#f47a20));
-	background: -moz-linear-gradient(top,  #faa51a,  #f47a20);
-	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#faa51a', endColorstr='#f47a20');
+	background: linear-gradient(180deg, #faa51a 1%, #f47a20 100%);
 }
 button.annotate-toggle:hover {
 	text-decoration: none;
 
 	background: #f47c20;
-	background: -webkit-gradient(linear, left top, left bottom, from(#f88e11), to(#f06015));
-	background: -moz-linear-gradient(top,  #f88e11,  #f06015);
-	filter:  progid:DXImageTransform.Microsoft.gradient(startColorstr='#f88e11', endColorstr='#f06015');
+	background: linear-gradient(180deg, #f88e11 1%, #f06015 100%);
 }
 button.annotate-toggle:active {
 	position: relative;
 	top: 1px;
 }
 
+/***** print mode *****/
 .print-mode {
 	cursor: pointer;
 	position: absolute;
 	padding: 5px;
 	bottom: 0;
 	right: 0;
+}
+
+/***** header ******/
+
+.header {
+    width: 100%;
+    margin: 0;
+    padding: 2px;
+    border-bottom: 1px solid grey;
+    background-color: #FFEFD5;
+    color: #555;
+    font-size: 0.9em;
+    text-align: right;
+}
+.header a, .header a:visited, .header a:hover {
+    text-decoration: none;
+    color: #555;
+}
+.header a.this-page:before {
+    content: "❧\00a0";
+}
+.header a, .header span {
+    margin-right: 0.5em;
+}
+.header a.this-page {
+    font-weight: bold;
 }

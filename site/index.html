@@ -29,6 +29,10 @@
 </head>
 
 <body class="illustrated">
+<div class="header">
+    <a class="this-page" href="https://tls13.ulfheim.net">TLS 1.3</a>
+    <a href="https://tls12.ulfheim.net">TLS 1.2</a>
+</div>
 <h1>The Illustrated TLS 1.3 Connection</h1>
 <div class="container">
 
@@ -796,48 +800,16 @@ e05f64fcd082bdb0dce473adf669c2769f257a1c75a51b7887468b5e0e7a7de4f4d34555112077f1
 	possible attacks:
 
 	<processblock>
-<pre>early_secret = HKDF-Extract(
-	salt=00,
-	key=00...)
+<pre>early_secret = HKDF-Extract(salt: 00, key: 00...)
 empty_hash = SHA384("")
-derived_secret = HKDF-Expand-Label(
-	key = early_secret,
-	label = "derived",
-	context = empty_hash,
-	len = 48)
-handshake_secret = HKDF-Extract(
-	salt = derived_secret,
-	key = shared_secret)
-client_handshake_traffic_secret = HKDF-Expand-Label(
-	key = handshake_secret,
-	label = "c hs traffic",
-	context = hello_hash,
-	len = 48)
-server_handshake_traffic_secret = HKDF-Expand-Label(
-	key = handshake_secret,
-	label = "s hs traffic",
-	context = hello_hash,
-	len = 48)
-client_handshake_key = HKDF-Expand-Label(
-	key = client_handshake_traffic_secret,
-	label = "key",
-	context = "",
-	len = 32)
-server_handshake_key = HKDF-Expand-Label(
-	key = server_handshake_traffic_secret,
-	label = "key",
-	context = "",
-	len = 32)
-client_handshake_iv = HKDF-Expand-Label(
-	key = client_handshake_traffic_secret,
-	label = "iv",
-	context = "",
-	len = 12)
-server_handshake_iv = HKDF-Expand-Label(
-	key = server_handshake_traffic_secret,
-	label = "iv",
-	context = "",
-	len = 12)
+derived_secret = HKDF-Expand-Label(key: early_secret, label: "derived", ctx: empty_hash, len: 48)
+handshake_secret = HKDF-Extract(salt: derived_secret, key: shared_secret)
+client_secret = HKDF-Expand-Label(key: handshake_secret, label: "c hs traffic", ctx: hello_hash, len: 48)
+server_secret = HKDF-Expand-Label(key: handshake_secret, label: "s hs traffic", ctx: hello_hash, len: 48)
+client_handshake_key = HKDF-Expand-Label(key: client_secret, label: "key", ctx: "", len: 32)
+server_handshake_key = HKDF-Expand-Label(key: server_secret, label: "key", ctx: "", len: 32)
+client_handshake_iv = HKDF-Expand-Label(key: client_secret, label: "iv", ctx: "", len: 12)
+server_handshake_iv = HKDF-Expand-Label(key: server_secret, label: "iv", ctx: "", len: 12)
 </pre>
 	</processblock>
 
@@ -1901,22 +1873,16 @@ $ cat /tmp/msg1 \
 		</span>
 		<div class="explanation">
 			The verify_data is built using the
-			server_handshake_traffic_secret from
+			server_secret from
 			the "Server Handshake Keys Calc" step and
 			a SHA384 hash of every handshake record
 			before this point (Client Hello to Server Certificate
 			Verify).
 
 			<processblock class="notrunc">
-<pre>finished_key = HKDF-Expand-Label(
-	key = server_handshake_traffic_secret,
-	label = "finished",
-	context = "",
-	len = 32)
+<pre>finished_key = HKDF-Expand-Label(key: server_secret, label: "finished", ctx: "", len: 32)
 finished_hash = SHA384(Client Hello ... Server Cert Verify)
-verify_data = HMAC-SHA384(
-	key = finished_key,
-	msg = finished_hash)
+verify_data = HMAC-SHA384(key: finished_key, msg: finished_hash)
 </pre>
 			</processblock>
 
@@ -1977,7 +1943,6 @@ fa6800169a6baac19159524fa7b9721b41be3c9db6f3f93fa5ff7e3db3ece204d2b456c51046e40e
 	</code></pre>
 	</codesample>
 
-	<br/><br/>
 	We then feed the hash and the handshake secret into a set of
 	key derivation operations, designed to ensure the integrity
 	of the handshake process and to protect against known and
@@ -1985,44 +1950,14 @@ fa6800169a6baac19159524fa7b9721b41be3c9db6f3f93fa5ff7e3db3ece204d2b456c51046e40e
 
 	<processblock>
 <pre>empty_hash = SHA384("")
-derived_secret = HKDF-Expand-Label(
-	key = handshake_secret,
-	label = "derived",
-	context = empty_hash,
-	len = 48)
-master_secret = HKDF-Extract(
-	salt=derived_secret,
-	key=00...)
-client_application_traffic_secret = HKDF-Expand-Label(
-	key = master_secret,
-	label = "c ap traffic",
-	context = handshake_hash,
-	len = 48)
-server_application_traffic_secret = HKDF-Expand-Label(
-	key = master_secret,
-	label = "s ap traffic",
-	context = handshake_hash,
-	len = 48)
-client_application_key = HKDF-Expand-Label(
-	key = client_application_traffic_secret,
-	label = "key",
-	context = "",
-	len = 32)
-server_application_key = HKDF-Expand-Label(
-	key = server_application_traffic_secret,
-	label = "key",
-	context = "",
-	len = 32)
-client_application_iv = HKDF-Expand-Label(
-	key = client_application_traffic_secret,
-	label = "iv",
-	context = "",
-	len = 12)
-server_application_iv = HKDF-Expand-Label(
-	key = server_application_traffic_secret,
-	label = "iv",
-	context = "",
-	len = 12)
+derived_secret = HKDF-Expand-Label(key: handshake_secret, label: "derived", ctx: empty_hash, len: 48)
+master_secret = HKDF-Extract(salt: derived_secret, key: 00...)
+client_secret = HKDF-Expand-Label(key: master_secret, label: "c ap traffic", ctx: handshake_hash, len: 48)
+server_secret = HKDF-Expand-Label(key: master_secret, label: "s ap traffic", ctx: handshake_hash, len: 48)
+client_application_key = HKDF-Expand-Label(key: client_secret, label: "key", ctx: "", len: 32)
+server_application_key = HKDF-Expand-Label(key: server_secret, label: "key", ctx: "", len: 32)
+client_application_iv = HKDF-Expand-Label(key: client_secret, label: "iv", ctx: "", len: 12)
+server_application_iv = HKDF-Expand-Label(key: server_secret, label: "iv", ctx: "", len: 12)
 </pre>
 	</processblock>
 
@@ -2274,21 +2209,15 @@ $ cat /tmp/msg2 \
 		</span>
 		<div class="explanation">
 			The verify_data is built using the
-			client_handshake_traffic_secret from
+			client_secret from
 			the "Server Handshake Keys Calc" step and
 			a SHA384 hash of every handshake record
 			before this point (Client Hello to Server Finished).
 
 			<processblock class="notrunc">
-<pre>finished_key = HKDF-Expand-Label(
-	key = client_handshake_traffic_secret,
-	label = "finished",
-	context = "",
-	len = 32)
+<pre>finished_key = HKDF-Expand-Label(key: client_secret, label: "finished", ctx: "", len: 32)
 finished_hash = SHA384(Client Hello ... Server Finished)
-verify_data = HMAC-SHA384(
-	key = finished_key,
-	msg = finished_hash)
+verify_data = HMAC-SHA384(key: finished_key, msg: finished_hash)
 </pre>
 			</processblock>
 
