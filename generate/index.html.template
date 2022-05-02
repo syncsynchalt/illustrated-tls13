@@ -72,7 +72,7 @@
 	for key exchange.  Key exchange is a technique
 	where two parties can agree on the same number without
 	an eavesdropper being able to tell what the number is.
-	It will do this via an elliptical curve method, using the x25519 curve.
+	It will do this via an elliptic curve method, using the x25519 curve.
 	<p>
 	Explaining and understanding the details of ECDHE key exchange
 	is outside the scope of this document. I found Andrea Corbellini's
@@ -345,7 +345,7 @@ pub:
 		</span>
 		<div class="explanation">
 			The client has indicated that it supports receiving
-			elliptical curve data points in the following compression formats:
+			elliptic curve data points in the following compression formats:
 			<ul>
 				<li><tt>%0 %1</tt> - assigned value for extension "ec point formats"
 				<li><tt>%2 %3</tt> - %nn2 bytes of format types follow
@@ -563,7 +563,7 @@ pub:
 	where two parties can agree on the same number without
 	an eavesdropper being able to tell what the number is.
 	<p>
-	It will do this via an elliptical curve method, using the x25519 curve.
+	It will do this via an elliptic curve method, using the x25519 curve.
 	<p>
 	Explaining and understanding the details of ECDHE key exchange
 	is outside the scope of this document. I found Andrea Corbellini's
@@ -947,7 +947,7 @@ civ: 4256d2e0e88babdd05eb2f27
 	result of the key exchange that allows the client and server
 	to agree on a number.  The client multiplies the server's
 	public key with the client's private key using the curve25519()
-	algorithm. The properties of elliptical curve multiplication will
+	algorithm. The properties of elliptic curve multiplication will
 	cause this to result in the same number found by the server in its
 	multiplication. The 32-byte result is found to be:
 	<pre class="ind2"><tt class="longboi"
