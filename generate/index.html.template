@@ -414,7 +414,7 @@ pub:
             will have no effect in this session.
             <ul>
                 <li><tt>00 16</tt> - assigned value for extension "Encrypt Then MAC"
-                <li><tt>%2 %3</tt> - %nn2 bytes of "Session Ticket" extension data follows
+                <li><tt>%2 %3</tt> - %nn2 bytes of "Encrypt Then MAC" extension data follows
             </ul>
         </div>
     </span>
@@ -433,7 +433,7 @@ pub:
             will have no effect in this session.
             <ul>
                 <li><tt>00 17</tt> - assigned value for extension "Extended Master Secret"
-                <li><tt>%2 %3</tt> - %nn2 bytes of "Session Ticket" extension data follows
+                <li><tt>%2 %3</tt> - %nn2 bytes of "Extended Master Secret" extension data follows
             </ul>
         </div>
     </span>
