@@ -4,7 +4,7 @@ targets: aes_256_gcm_decrypt
 	$(MAKE) $(TARGETS)
 
 aes_256_gcm_decrypt.c:
-	curl -sO https://tls13.ulfheim.net/files/aes_256_gcm_decrypt.c
+	curl -sO https://tls13.xargs.org/files/aes_256_gcm_decrypt.c
 
 aes_256_gcm_decrypt: aes_256_gcm_decrypt.c
 	cc -I ../../openssl/openssl/include \

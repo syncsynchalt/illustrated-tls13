@@ -1,6 +1,6 @@
 # The Illustrated TLS Connection
 
-Published at https://tls13.ulfheim.net
+Published at https://tls13.xargs.org
 
 - `site/`: page source for the finished product
 - `server/main.c`: server code

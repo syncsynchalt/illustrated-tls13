@@ -4,7 +4,7 @@ targets: aes_128_gcm_decrypt
 	$(MAKE) $(TARGETS)
 
 aes_128_gcm_decrypt.c:
-	curl -sO https://tls13.ulfheim.net/files/aes_128_gcm_decrypt.c
+	curl -sO https://tls13.xargs.org/files/aes_128_gcm_decrypt.c
 
 aes_128_gcm_decrypt: aes_128_gcm_decrypt.c
 	cc -I ../../boringssl/boringssl/include \
