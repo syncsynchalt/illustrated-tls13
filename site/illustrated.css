@@ -1,3 +1,26 @@
+:root {
+    --chunky-text: #777;
+    --server-bg: hsl(190, 60%, 80%);
+    --client-bg: hsl(142, 61%, 82%);
+    --server-bg-hover: hsl(288, 28%, 83%);
+    --client-bg-hover: hsl(288, 31%, 80%);
+
+    --sam-btn0: hsl(190, 30%, 45%);
+    --sam-btn9: hsl(190, 25%, 40%);
+    --sam-hov-btn0: hsl(190, 30%, 40%);
+    --sam-hov-btn9: hsl(190, 25%, 35%);
+    --sam-btn-shadow: hsl(180, 41%, 28%);
+    --sam-btn-inset: hsl(180, 45%, 40%);
+    --sam-btn-border: hsl(161, 10%, 37%);
+
+    --act-btn0: hsl(37, 96%, 54%);
+    --act-btn9: hsl(25, 91%, 54%);
+    --act-hov-btn0: hsl(32, 94%, 52%);
+    --act-hov-btn9: hsl(21, 88%, 51%);
+    --act-btn-shadow: hsl(25, 91%, 40%);
+    --act-btn-border: hsl(33, 90%, 45%);
+}
+
 /* remove focus rings for non-keyboard users */
 body:not(.user-is-tabbing) button:focus,
 body:not(.user-is-tabbing) input:focus,
@@ -85,11 +108,11 @@ tt.longboi {
 }
 
 .server {
-    background-color: #D0E8F5;
+    background-color: var(--server-bg);
 }
 
 .client {
-    background-color: #D8EDCF;
+    background-color: var(--client-bg);
 }
 
 /***** .record and .calculation *****/
@@ -114,16 +137,16 @@ tt.longboi {
 .embed-arrow {
     position: absolute;
     font-size: 2em;
-    color: #888;
+    color: var(--chunky-text);
 }
 
 .illustrated .server.record .rec-label:before {
     content: "❰ ";
-    color: #888;
+    color: var(--chunky-text);
 }
 .illustrated .client.record .rec-label:before {
     content: "❱ ";
-    color: #888;
+    color: var(--chunky-text);
 }
 .illustrated .server.record.embedded .rec-label:before,
 .illustrated .client.record.embedded .rec-label:before {
@@ -132,7 +155,7 @@ tt.longboi {
 .illustrated .calculation .rec-label:before {
     content: "± ";
     font-weight: bold;
-    color: #888;
+    color: var(--chunky-text);
 }
 
 .rec-label {
@@ -162,7 +185,7 @@ tt.longboi {
 }
 .illustrated .record.selected .rec-label:after,
 .illustrated .calculation.selected .rec-label:after {
-    color: #888;
+    color: var(--chunky-text);
     content: " ×";
     font-weight: bold;
     cursor: pointer;
@@ -216,10 +239,10 @@ tt.longboi {
 /***** .record-data *****/
 
 .client .record-data .string .bytes:hover {
-    background-color: #FFEFD5;
+    background-color: var(--client-bg-hover);
 }
 .server .record-data .string .bytes:hover {
-    background-color: #FFEFD5;
+    background-color: var(--server-bg-hover);
 }
 .record.annotate .record-data .string:hover {
     color: inherit;
@@ -253,11 +276,7 @@ tt.longboi {
     content: "";
     position: absolute;
     box-shadow: rgba(0, 0, 0, 0.3) 2px 2px 2px;
-    -webkit-transform: rotate(45deg);
-    -moz-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    -o-transform: rotate(45deg);
-    transform: rotate 45deg;
+    transform: rotate(45deg);
     bottom: -3px;
     left: 10px;
     border-width: 3px;
@@ -284,11 +303,7 @@ tt.longboi {
     content: " ";
     position: absolute;
     padding: 5px;
-    -webkit-transform: rotate(45deg);
-    -moz-transform: rotate(45deg);
-    -ms-transform: rotate(45deg);
-    -o-transform: rotate(45deg);
-    transform: rotate 45deg;
+    transform: rotate(45deg);
     top: -7px;
     left: 20px;
     border: 2px solid;
@@ -308,12 +323,12 @@ tt.longboi {
 .record .decryption > .label:before {
     content: "⬇ ";
     font-weight: bold;
-    color: #888;
+    color: var(--chunky-text);
 }
 .record .decryption > .label:after {
     content: " ⬇";
     font-weight: bold;
-    color: #888;
+    color: var(--chunky-text);
 }
 
 .string .bytes {
@@ -321,11 +336,11 @@ tt.longboi {
 }
 
 .string.encrypted .bytes {
-    text-shadow: 1px 1px 0px red;
+    text-shadow: 1px 1px 0 red;
 }
 
 .string.decrypted .bytes {
-    text-shadow: 1px 1px 0px green;
+    text-shadow: 1px 1px 0 green;
 }
 
 .record-data .decryption {
@@ -343,11 +358,9 @@ processblock {
     position: relative;
     margin: 1em;
     padding-left: 1em;
-    font-size: 0.9em;
-    /* max-height: 150px; */
     overflow: hidden;
     transition: all 0.3s;
-    cursor-style: pointer;
+    cursor: pointer;
 
     font-size: 0.8em;
 }
@@ -361,33 +374,10 @@ processblock:before {
     top: 0;
     pointer-events: none;
 }
-/*
-.server processblock:before {
-    background: linear-gradient(rgba(255,255,255,0) 100px, #D0E8F5);
-}
-.client processblock:before {
-    background: linear-gradient(rgba(255,255,255,0) 125px, #D8EDCF);
-}
-.explanation processblock:before {
-    background: linear-gradient(rgba(255,255,255,0) 125px, #FAF7DC);
-}
-*/
 
 processblock pre {
     margin: 0;
 }
-
-/*
-processblock.clicked,
-processblock.notrunc {
-    max-height: 99999px;
-    cursor-style: auto;
-}
-processblock.clicked:before,
-processblock.notrunc:before {
-    background: none;
-}
-*/
 
 /***** codesample *****/
 
@@ -404,24 +394,22 @@ codesample pre {
 codesample button.show-code {
     display: block;
     clear: both;
-    box-shadow: inset 0px 1px 3px 0px #91b8b3;
-    background: linear-gradient(to bottom, #768d87 5%, #6c7c7c 100%);
-    background-color: #768d87;
+    box-shadow: inset 0 1px 3px 0 var(--sam-btn-inset);
+    background: linear-gradient(to bottom, var(--sam-btn0) 1%, var(--sam-btn9) 100%);
     border-radius:5px;
-    border: 1px solid #566963;
+    border: 1px solid var(--sam-btn-border);
     cursor: pointer;
-    color: #ffffff;
-    font-family: Arial;
+    color: white;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 15px;
     font-weight: bold;
     padding: 11px 23px;
     text-decoration: none;
-    text-shadow: 0px -1px 0px #2b665e;
+    text-shadow: 0 -1px 0 var(--sam-btn-shadow);
 }
 
 codesample button.show-code:hover:hover {
-    background: linear-gradient(to bottom, #6c7c7c 5%, #768d87 100%);
-    background-color: #6c7c7c;
+    background: linear-gradient(to bottom, var(--sam-hov-btn0) 1%, var(--sam-hov-btn9) 100%);
 }
 codesample button.show-code:active {
     position: relative;
@@ -444,23 +432,20 @@ button.annotate-toggle {
     cursor: pointer;
     text-align: center;
     text-decoration: none;
-    font: Arial, Helvetica, sans-serif;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 1em;
     padding: .4em 1.7em .45em;
-    text-shadow: 0 1px 1px rgba(0,0,0,.4);
+    text-shadow: 0 1px 1px var(--act-btn-shadow);
     border-radius: .5em;
     box-shadow: 1px 1px 1px rgba(0,0,0,.3);
 
     color: #fff;
-    border: solid 1px #da7c0c;
-    background: #f78d1d;
-    background: linear-gradient(180deg, #faa51a 1%, #f47a20 100%);
+    border: solid 1px var(--act-btn-border);
+    background: linear-gradient(180deg, var(--act-btn0) 1%, var(--act-btn9) 100%);
 }
 button.annotate-toggle:hover {
     text-decoration: none;
-
-    background: #f47c20;
-    background: linear-gradient(180deg, #f88e11 1%, #f06015 100%);
+    background: linear-gradient(180deg, var(--act-hov-btn0) 1%, var(--act-hov-btn9) 100%);
 }
 button.annotate-toggle:active {
     position: relative;

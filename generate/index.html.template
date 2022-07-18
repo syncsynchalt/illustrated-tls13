@@ -1,5 +1,6 @@
 <!doctype html>
-<html>
+<!--suppress HtmlUnknownTarget, HtmlRequiredAltAttribute, XmlDeprecatedElement, CheckImageSize -->
+<html lang="en">
 
 <head>
     <title>The Illustrated TLS 1.3 Connection: Every Byte Explained</title>
@@ -178,7 +179,7 @@ pub:
             must be disguised as a TLS 1.2 session.
             This field is no
             longer used for version negotiation and
-            is hardcoded to the 1.2 version.  Instead
+            is hardcoded to the 1.2 version.  Instead,
             version negotiation is performed using the
             "Supported Versions" extension below.
             <br/><br/>
@@ -217,7 +218,7 @@ pub:
             In TLS 1.3 this "session resume" is done via the more flexible
             PSK (pre-shared keys) mechanism, so this
             field is no longer needed for that purpose.
-            Instead a non-empty value in this field is
+            Instead, a non-empty value in this field is
             used to trigger "middlebox compatibility
             mode" which helps TLS 1.3 sessions to be
             disguised as resumed TLS 1.2 sessions.  The
@@ -312,7 +313,7 @@ pub:
             server it is contacting, also known as SNI
             (Server Name Indication).
             <br/><br/>
-            Without this extension a HTTPS server would
+            Without this extension an HTTPS server would
             not be able to provide service for multiple
             hostnames (virtual hosts) on a single IP address
             because it couldn't know which
@@ -536,7 +537,7 @@ pub:
                 <li><tt>%4 %5</tt> - %nn4 bytes of key share data follows
                 <li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
                 <li><tt>%8 %9</tt> - %nn8 bytes of public key follows
-                <li><tt>%10 %11 ... %-2 %-1</tt></l> - public key from the step "Client Key Exchange Generation"
+                <li><tt>%10 %11 ... %-2 %-1</tt> - public key from the step "Client Key Exchange Generation"
             </ul>
         </div>
     </span>
@@ -662,7 +663,7 @@ pub:
             must be disguised as a TLS 1.2 session.
             This field is no
             longer used for version negotiation and
-            is hardcoded to the 1.2 version.  Instead
+            is hardcoded to the 1.2 version.  Instead,
             version negotiation is performed using the
             "Supported Versions" extension below.
             <br/><br/>
@@ -694,7 +695,7 @@ pub:
         </span>
         <div class="explanation">
             This legacy field is no longer used to
-            identify and re-use sessions.  Instead the
+            identify and re-use sessions.  Instead, the
             server echos the session ID provided by the
             client, if any.
             <ul>
@@ -782,7 +783,7 @@ pub:
                 <li><tt>%2 %3</tt> - %nn2 bytes of "Key Share" extension data follows
                 <li><tt>00 1d</tt> - assigned value for x25519 (key exchange via curve25519)
                 <li><tt>%6 %7</tt> - %nn6 bytes of public key follows
-                <li><tt>%8 %9 ... %-2 %-1</tt></l> - public key from the step "Server Key Exchange Generation"
+                <li><tt>%8 %9 ... %-2 %-1</tt> - public key from the step "Server Key Exchange Generation"
             </ul>
         </div>
     </span>
@@ -1145,7 +1146,7 @@ $ cat /tmp/msg1 \
 <div class="rec-label">Server Encrypted Extensions</div>
 <div class="rec-explanation">
     Any extensions that aren't needed for negotiating encryption
-    keys should be listed here so they can be hidden from
+    keys should be listed here so that they can be hidden from
     eavesdroppers and middleboxes.
 </div>
 %file ../captures/caps/serverextensions
@@ -1907,6 +1908,7 @@ $ echo $fin_hash | xxd -r -p \
             </codesample>
         </div>
     </span>
+</span>
 </div>
 </div>
 %next 1
@@ -2184,6 +2186,7 @@ $ cat /tmp/msg2 \
             </ul>
         </div>
     </span>
+</span>
 </div>
 </div>
 %empty
@@ -2257,6 +2260,7 @@ bff56a671b6c659d0a7c5dd18428f58bdd38b184a3ce342d9fde95cbd5056f7da7918ee320eab7a9
             </codesample>
         </div>
     </span>
+</span>
 </div>
 </div>
 %next 1
@@ -3112,18 +3116,19 @@ $ cat /tmp/msg4 \
 </div>
 
 <div id="templates" style="display: none">
-    <div id="closeBtnTmpl">
-        <span class="close" onclick="ill.unselectAllStrings()">×</span>
-    </div>
     <div id="showCodeTmpl">
+        <!--suppress JSDeprecatedSymbols -->
         <button class="show-code" onclick="ill.showCode(this, event)">Show Code</button>
     </div>
+    <!--suppress JSDeprecatedSymbols -->
     <button id="annotateTmpl" class="annotate-toggle"
         onclick="ill.toggleAnnotate(this.parentElement, event)">Annotations</button>
 </div>
 
+<!--suppress HtmlUnknownAnchorTarget -->
 <a class="print-mode" href="#print" onclick="ill.printMode()">
     [print]
 </a>
+</div>
 </body>
 </html>
