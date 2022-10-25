@@ -218,9 +218,12 @@
         if (e.keyCode === 27) {
             els = document.querySelectorAll(".record.annotate");
             if (els.length) {
-                [].forEach.call(els, (rec) => { rec.classList.remove("annotate"); });
+                [].forEach.call(els, (rec) => {
+                    ill.toggleAnnotate(rec, e);
+                });
             } else {
                 ill.unselectAllRecords();
+                ill.changeHash("");
             }
         }
     };
