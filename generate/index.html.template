@@ -1881,7 +1881,7 @@ $ cat /tmp/msg1 \
             Verify).
 
             <processblock class="notrunc">
-<pre>finished_key = HKDF-Expand-Label(key: server_secret, label: "finished", ctx: "", len: 32)
+<pre>finished_key = HKDF-Expand-Label(key: server_secret, label: "finished", ctx: "", len: 48)
 finished_hash = SHA384(Client Hello ... Server Cert Verify)
 verify_data = HMAC-SHA384(key: finished_key, msg: finished_hash)
 </pre>
@@ -2232,7 +2232,7 @@ $ cat /tmp/msg2 \
             before this point (Client Hello to Server Finished).
 
             <processblock class="notrunc">
-<pre>finished_key = HKDF-Expand-Label(key: client_secret, label: "finished", ctx: "", len: 32)
+<pre>finished_key = HKDF-Expand-Label(key: client_secret, label: "finished", ctx: "", len: 48)
 finished_hash = SHA384(Client Hello ... Server Finished)
 verify_data = HMAC-SHA384(key: finished_key, msg: finished_hash)
 </pre>
