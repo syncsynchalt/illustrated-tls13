@@ -927,7 +927,7 @@ civ: 4256d2e0e88babdd05eb2f27
 <img class="illustration" src="images/key8.png" width="97" height="250"/>
 <div class="rec-explanation">
     The client now has the information to calculate the
-    keys that used to encrypt the rest of the handshake.  It uses the following
+    keys used to encrypt the rest of the handshake.  It uses the following
     information in this calculation:
     <ul>
     <li><a href="files/server-ephemeral-public.key">server public key</a> (from Server Hello)
