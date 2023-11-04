@@ -26,20 +26,21 @@
         (el) => {
             el.classList.remove("selected");
         });
+        ill.normalizeOpenCloseAll();
     };
 
     ill.toggleRecord = (element, event) => {
-        let selected = element.classList.contains("selected");
-        ill.unselectAllRecords();
-        if (!selected) {
+        ill.cancel(event);
+        if (!element.classList.contains("selected")) {
             element.classList.add("selected");
             if (event) { ill.changeHash(element.dataset.anchor); }
+            ill.ensureElementInView(element);
         } else {
+            element.classList.remove("selected");
             ill.closeAllCode();
             if (event) { ill.changeHash(""); }
         }
-        ill.cancel(event);
-        ill.ensureElementInView(element);
+        ill.normalizeOpenCloseAll();
     };
 
     ill.selectRecord = (element, event) => {
@@ -115,6 +116,10 @@
 
     ill.resolveHash = () => {
         let hash = window.location.hash.replace(/^#/, "");
+        if (hash === 'open-all') {
+            let btn = document.getElementById('openCloseAll');
+            if (btn) btn.click();
+        }
         const rec = ill.anchors[hash];
         if (!rec) {
             return;
@@ -155,22 +160,64 @@
         });
     };
 
+    /**
+     * Open or close all elements on the page
+     * @param {string} openOrClose - "open" or "close"
+     */
+    let actionAll = (openOrClose) => {
+        let classOperation = openOrClose === 'open' ? document.body.classList.add : document.body.classList.remove;
+        [].forEach.call(document.querySelectorAll(".record, .calculation"), (el) => {
+            classOperation.call(el.classList, "selected", "annotate");
+        });
+        [].forEach.call(document.querySelectorAll("codesample"), (el) => {
+            classOperation.call(el.classList, "show");
+        });
+        if (openOrClose !== 'open') {
+            ill.closeAllCode();
+        };
+    };
+
+    ill.openCloseAll = (btn, event) => {
+        ill.cancel(event);
+        btn = btn || document.getElementById('openCloseAll');
+        if (!btn) return;
+
+        let action = btn.dataset['lblState'];
+        actionAll(action);
+        let nextState = action === 'open' ? 'close' : 'open';
+        ill.changeHash(action === 'open' ? 'open-all' : '');
+        ill.normalizeOpenCloseAll();
+    };
+
+    ill.normalizeOpenCloseAll = () => {
+        let allCount = document.querySelectorAll('.record, .calculation').length;
+        let openCount = document.querySelectorAll('.record.selected, .calculation.selected').length;
+        let closedCount = allCount - openCount;
+
+        let newButtonState = 'open';
+        if (closedCount === 0) {
+            newButtonState = 'close';
+        }
+
+        let btn = document.getElementById('openCloseAll');
+        if (btn && btn.dataset['lblState'] !== newButtonState) {
+            // swap text w/ lbl-toggle, then swap state
+            let tmp = btn.textContent;
+            btn.textContent = btn.dataset['lblToggle'];
+            btn.dataset['lblToggle'] = tmp;
+            btn.dataset['lblState'] = newButtonState;
+        }
+    };
+
     ill.printMode = () => {
         // add printmode css
         let inject = document.createElement("link");
         inject.setAttribute("rel", "stylesheet");
         inject.setAttribute("href", "printmode.css");
         document.head.appendChild(inject);
-        // open everything up
-        [].forEach.call(document.querySelectorAll(".record, .calculation"), (el) => {
-            el.classList.add("selected");
-            el.classList.add("annotate");
-        });
+        actionAll('open');
         [].forEach.call(document.querySelectorAll("processblock"), (el) => {
             el.classList.add("notrunc");
-        });
-        [].forEach.call(document.querySelectorAll("codesample"), (el) => {
-            el.classList.add("show");
         });
         [].forEach.call(document.querySelectorAll("*"), (el) => {
             el.onclick = null;
@@ -190,10 +237,8 @@
         [].forEach.call(document.querySelectorAll(".record, .calculation"), (el) => {
             ill.addAnchors(el);
             el.onclick = (event) => {
-                if (el === event.target && event.offsetY < 60) {
+                if (!el.classList.contains("selected") || (el === event.target && event.offsetY < 60)) {
                     ill.toggleRecord(el, event);
-                } else {
-                    ill.selectRecord(el, event);
                 }
             };
         });

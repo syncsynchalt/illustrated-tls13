@@ -9,16 +9,16 @@
     <meta name="format-detection" content="telephone=no"/>
     <meta name="title" content="The Illustrated TLS 1.3 Connection"/>
     <meta name="description" content="Every byte of a TLS 1.3 connection explained and reproduced"/>
-    <link rel="stylesheet" href="frombootstrap.css?b"/>
-    <link rel="stylesheet" href="illustrated.css?b"/>
-    <script src="illustrated.js?b"></script>
+    <link rel="stylesheet" href="frombootstrap.css?b1"/>
+    <link rel="stylesheet" href="illustrated.css?b1"/>
+    <script src="illustrated.js?b1"></script>
 
     <!-- Facebook Meta Tags -->
     <meta property="og:url" content="https://tls13.xargs.org/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="The Illustrated TLS 1.3 Connection">
     <meta property="og:description" content="Every byte of a TLS connection explained and reproduced">
-    <meta property="og:image" content="https://tls13.xargs.org/images/og.png#b">
+    <meta property="og:image" content="https://tls13.xargs.org/images/og.png">
 
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
@@ -58,6 +58,12 @@
     and then terminates the session. Click below to begin
     exploring.</p>
     </div>
+
+<div class="open-close-all rec-outer">
+    <button id="openCloseAll" class="annotate-toggle"
+        data-lbl-state="open" data-lbl-toggle="Close All"
+        onclick="ill.openCloseAll(this, event)">Open All</button>
+</div>
 
 <div class="rec-outer">
 <div class="calculation client">
