@@ -2635,7 +2635,7 @@ $ cat /tmp/msg5 \
             ticket generated during this session.
             <ul>
             <li><tt>%0</tt> - %n0 bytes of nonce data follows
-            <li><tt>%1 %2 %3 %5 %6 %7 %8</tt> - nonce value
+            <li><tt>%1 %2 %3 %4 %5 %6 %7 %8</tt> - nonce value
             </ul>
         </div>
     </span>
@@ -2894,7 +2894,7 @@ $ cat /tmp/msg5 \
             ticket generated during this session.
             <ul>
             <li><tt>%0</tt> - %n0 bytes of nonce data follows
-            <li><tt>%1 %2 %3 %5 %6 %7 %8</tt> - nonce value
+            <li><tt>%1 %2 %3 %4 %5 %6 %7 %8</tt> - nonce value
             </ul>
         </div>
     </span>
