@@ -364,12 +364,14 @@ pub:
 %bytes
         </span>
         <div class="explanation">
-            The client has indicated that it supports
-            elliptic curve (EC) cryptography for ten curve types.
-            To make this extension more generic for
-            other cryptography types it calls these
-            "supported groups" instead of "supported
-            curves".
+            The client has indicated that it supports key exchange using ten
+            methods: five using elliptic curves (EC) and five using finite
+            fields.
+            <br/><br/>
+            This extension was formerly called "Supported Curves" and in
+            earlier versions of TLS only indicated elliptic curves. It
+            was renamed and repurposed in TLS 1.3 to include indicating
+            support for non-EC key exchange.
             <br/><br/>
             This list is presented in descending order
             of the client's preference.
